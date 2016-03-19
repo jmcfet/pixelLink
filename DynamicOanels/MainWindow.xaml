@@ -11,10 +11,7 @@
         Title="MainWindow" Height="900" Width="600">
     <Window.Resources>
         <local:ByteImageConverter x:Key="imageConverter" />
-        <ContextMenu x:Key="cmButton">
-            <MenuItem Header="add to bottom" Click="MenuItemAddBottomClicked" />
-            <MenuItem Header="add to side" Click="MenuItemAddSideClicked" />
-        </ContextMenu>
+      
         	<DataTemplate x:Key="ImageGalleryDataTemplate">
 			<Grid>
                 <StackPanel   Width="120" Height="120"  Margin="15" >

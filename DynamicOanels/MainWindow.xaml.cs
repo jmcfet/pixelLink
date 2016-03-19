@@ -261,6 +261,8 @@ namespace DynamicOanels
         {
 
             List<LayoutPanel> freepanels = panels.Where(p => p.Content == null).ToList();
+            if (freepanels.Count == 0)
+                return;
             //Preview cam = new Preview();
             //camlist.Add(cam);
             cam.bActive = true;

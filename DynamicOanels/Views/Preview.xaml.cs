@@ -20,12 +20,16 @@ using System.IO;
 using System.Diagnostics;
 using DynamicOanels;
 using System.Security.Cryptography;
+using DevExpress.Xpf.Docking.Base;
+using DevExpress.Xpf.Docking;
 
 namespace Views
 {
     /// <summary>
     /// Interaction logic for Camera.xaml
     /// </summary>
+    ///
+   
     public partial class Preview : UserControl
     {
         
@@ -44,16 +48,34 @@ namespace Views
         public string Name = "";
         private object logger;
         BitmapImage image = null;
+        //public event DockItemClosedEventHandler DockItemClosed;
+        //public event DockItemCancelEventHandler DockItemClosing;
+
         //   TextBoxOutputter outputter;
         public Preview()
         {
             InitializeComponent();
   //          outputter = new TextBoxOutputter(TestBox);
   //          Console.SetOut(outputter);
-            Loaded += Camera_Loaded; 
-     
+            Loaded += Camera_Loaded;
+       
+        }
+       
+        private void DockLayoutManager_ShowingMenu(object sender, DevExpress.Xpf.Docking.Base.ShowingMenuEventArgs e)
+        {
+            DockLayoutManager dlm = sender as DockLayoutManager;
+            DocumentPanel dp = dlm.ActiveDockItem as DocumentPanel;
         }
 
+        private void Preview_DockItemClosing(object sender, ItemCancelEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Preview_DockItemClosed(object sender, DockItemClosedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
         private void Camera_Loaded(object sender, RoutedEventArgs e)
         {
@@ -73,9 +95,7 @@ namespace Views
            
             e.Handled = true;
         }
-
         
-
 
 
         public void grab_Click(object sender, RoutedEventArgs e)

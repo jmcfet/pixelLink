@@ -7,7 +7,8 @@
               xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
              xmlns:local="clr-namespace:Views"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="700">
+             d:DesignHeight="700" d:DesignWidth="700"
+             >
     <Grid>
         
         <Grid.RowDefinitions>
@@ -18,9 +19,9 @@
 
 
         <dxb:ToolBarControl Grid.Row="0" VerticalAlignment="Stretch" Caption="Standard" DockPanel.Dock="Top" AllowCustomizationMenu="False" >
-             <!--<dxb:BarButtonItem x:Name="bSelectAll" CategoryName="Edit" Content="ROI" KeyGesture="Ctrl+A" Glyph="{dx:DXImage Image=SelectAll_16x16.png}" ItemClick="bROI_ItemClick" BarItemDisplayMode="ContentAndGlyph"/>
+             <dxb:BarButtonItem x:Name="bSelectAll" CategoryName="Edit" Content="ROI" KeyGesture="Ctrl+A" Glyph="{dx:DXImage Image=SelectAll_16x16.png}" ItemClick="bROI_ItemClick" BarItemDisplayMode="ContentAndGlyph"/>
             <dxb:BarButtonItem x:Name="bClear" CategoryName="Edit" Content="Clear" Glyph="{dx:DXImage Image=Delete_16x16.png}" ItemClick="Clear_ItemClick" BarItemDisplayMode="ContentAndGlyph"/>
-            <dxb:BarButtonItem x:Name="Reset" CategoryName="Edit" Content="Reset" Glyph="{dx:DXImage Image=Delete_16x16.png}" ItemClick="Reset_ItemClick"  BarItemDisplayMode="ContentAndGlyph"/>-->
+            <dxb:BarButtonItem x:Name="Reset" CategoryName="Edit" Content="Reset" Glyph="{dx:DXImage Image=Delete_16x16.png}" ItemClick="Reset_ItemClick"  BarItemDisplayMode="ContentAndGlyph"/>
 
         </dxb:ToolBarControl>
         <!--<Border Grid.Row="1" Background="LightBlue" BorderBrush="Black" BorderThickness="2" Padding="15" Margin="0,0,-0.333,-0.334" Grid.RowSpan="2"  >-->

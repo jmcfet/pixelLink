@@ -75,7 +75,7 @@ namespace DynamicOanels
             ((App)Application.Current).logger.MyLogFile("app start", "");
 
             //     < dxdo:LayoutGroup Orientation = "Horizontal" >
-
+            docMan.DockItemClosed += DocMan_DockItemClosed;
 
             nAttachedCams = getNumberAttachedCams();
             
@@ -123,6 +123,13 @@ namespace DynamicOanels
             //}
 
         }
+
+        private void DocMan_DockItemClosed(object sender, DevExpress.Xpf.Docking.Base.DockItemClosedEventArgs e)
+        {
+           
+            SetTrayImageToNotinPreview(e.Item as LayoutPanel);
+        }
+
         private void Tile_ItemClick(object sender, DevExpress.Xpf.Bars.ItemClickEventArgs e)
         {
             DevExpress.Xpf.Bars.BarSubItem subitem = (sender as DevExpress.Xpf.Bars.BarSubItem);
@@ -153,6 +160,7 @@ namespace DynamicOanels
         {
             Groups = new LayoutGroup() { Orientation = Orientation.Horizontal, Name="Groups" };
             docMan.LayoutRoot = Groups;
+            
             Groups.Add(new LayoutPanel());
             Groups.Add(new LayoutPanel());
                      
@@ -162,11 +170,11 @@ namespace DynamicOanels
         {
             Groups.Clear();
             Groups.Orientation = or;
-            for (int i=0; i < 2 * 2;i++)
+            for (int i = 0; i < 2 * 2; i++)
             {
                 Groups.Add(new LayoutPanel());
             }
-         
+
             List<CameraContainer> activecams = cams.Where(c => c.bActive == true).ToList();
             setDropstargets(activecams, 2);
         }
@@ -267,8 +275,10 @@ namespace DynamicOanels
             //camlist.Add(cam);
             cam.bActive = true;
             freepanels[0].Content = cam.preview;
+            freepanels[0].Name =  cam.Name;
             freepanels[1].Content =  cam.hist;
-        
+            freepanels[1].Name = "hist" + cam.Name ; 
+
         }
         private  void WalkDownLogicalTree(DependencyObject d)
         {
@@ -290,12 +300,13 @@ namespace DynamicOanels
             panels.Clear();
             WalkDownLogicalTree(((LayoutGroup)Groups) as DependencyObject);
             int inActive = nTotalPanels - activecams.Count;
+            //set the panels that are not in preview state to drop targets         
             for (int i = activecams.Count; i < nTotalPanels; i++)
             {
                 panels[i * 2].AllowDrop = true;
                 panels[i * 2].Drop += TargetPanel_Drop;
                 panels[i * 2 + 1].Visibility = Visibility.Collapsed;
-                panels[i * 2].Name = string.Format("panel{0}", i);
+                panels[i * 2].Name = string.Format("DropTarget{0}", i);
 
             }
         }
@@ -367,8 +378,11 @@ namespace DynamicOanels
             {
                 if (panels[y].Name == droppedOn.Name)
                 {
+                    panels[y].Name = selectedCam.Name;   //panel contains preview
                     panels[y + 1].Visibility = Visibility.Visible;
                     panels[y + 1].Content = selectedCam.hist;
+                    panels[y + 1].Name = "hist" + selectedCam.Name;
+
                 }
             }
             droppedOn.Content = selectedCam.preview;
@@ -385,6 +399,33 @@ namespace DynamicOanels
             var itemsView = CollectionViewSource.GetDefaultView(LsImageGallery.ItemsSource);
             itemsView.Refresh();
         }
+
+        void SetTrayImageToNotinPreview(LayoutPanel item)
+        {
+            CameraContainer selected = cams.Where(c => c.Name == item.Name).SingleOrDefault();
+            if (selected == null)
+                return;
+            selected.bActive = false;
+            panels.Clear();
+            WalkDownLogicalTree(((LayoutGroup)Groups) as DependencyObject);
+            //close the associated Histogram as we close the preview
+            string associatedHist = "hist" + selected.Name;
+            for (int y = 0; y < panels.Count; y++)
+            {
+                if (panels[y].Name == associatedHist)
+                {
+                    docMan.DockController.RemovePanel(panels[y]);
+                   
+                }
+            }
+            //ImageEntity selected = ListImageObj.Where(c => c.CameraName == serialNum).SingleOrDefault();
+            //selected.bActive = true;
+            ////show the tray image as camera in preview mode
+            //selected.trayImage.ImagePath = File.ReadAllBytes("preview.png");
+            ////force a re-bind to update the gallery
+            //var itemsView = CollectionViewSource.GetDefaultView(LsImageGallery.ItemsSource);
+            //itemsView.Refresh();
+            }
 
 
 

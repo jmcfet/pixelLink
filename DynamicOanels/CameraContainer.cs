@@ -50,7 +50,7 @@ namespace DynamicOanels
                 bActive = true;
             CameraInformation info = new CameraInformation();
             rc = Api.GetCameraInformation(m_hCamera, ref info);
-            this.Name = Tray.CameraName =info.SerialNumber;
+            this.Name = Tray.CameraName ="a" + info.SerialNumber;
              
             s_callbackDelegate[cameraNum] = new Api.Callback(MyCallbackFunction);
             Api.SetCallback(m_hCamera, Overlays.Frame, 0xD00D, s_callbackDelegate[cameraNum]);

@@ -49,6 +49,8 @@ namespace DynamicOanels
         LayoutPanel histPanel = null;
         LayoutPanel targetPanel = null;
         List<LayoutPanel> panels = new List<LayoutPanel>();
+        List<LayoutGroup> allgroups = new List<LayoutGroup>();
+        
         long m_startframetime = (0x7FFFFFFFL);
         int m_startframe = 0;
         double m_rate = 0;
@@ -160,71 +162,56 @@ namespace DynamicOanels
         {
             Groups = new LayoutGroup() { Orientation = Orientation.Horizontal, Name="Groups" };
             docMan.LayoutRoot = Groups;
-            
-            Groups.Add(new LayoutPanel());
-            Groups.Add(new LayoutPanel());
-                     
-            
+            LayoutGroup Group1 = new LayoutGroup() { Orientation = Orientation.Horizontal, Name = "Groups", ShowCaption =true, Caption = "camera1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            Groups.Add(Group1);
+            Group1.AllowDrop = true;
+            Group1.Drop += TargetPanel_Drop;
         }
+
         void Create2View(Orientation or,bool DropTarget)
         {
             Groups.Clear();
             Groups.Orientation = or;
-            for (int i = 0; i < 2 * 2; i++)
-            {
-                Groups.Add(new LayoutPanel());
-            }
+            LayoutGroup Group1 = new LayoutGroup() { Orientation = Orientation.Horizontal, Name = "Groups", ShowCaption = true, Caption = "camera1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            Groups.Add(Group1);
 
-            List<CameraContainer> activecams = cams.Where(c => c.bActive == true).ToList();
-            setDropstargets(activecams, 2);
+            LayoutGroup Group2 = new LayoutGroup() { Orientation = Orientation.Horizontal, Name = "Groups", ShowCaption = true, Caption = "drop target", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            Groups.Add(Group2);
+
         }
         void Create12CamView()
         {
             Groups.Clear();
             Groups.Orientation = Orientation.Horizontal;
-            LayoutGroup top = new LayoutGroup();
+            LayoutGroup top = new LayoutGroup() { ShowCaption = true, Caption = "camera1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
             Groups.Add(top);
-
-            top.Add(new LayoutPanel());
-            top.Add(new LayoutPanel());
             List<CameraContainer> activecams = cams.Where(c => c.bActive == true).ToList();
-            LayoutGroup bottom = new LayoutGroup() { Orientation = Orientation.Vertical };
-            Groups.Add(bottom);
-            for (int i = 0; i < 2 * 2; i++)
-            {
-                bottom.Add(new LayoutPanel());
-            }
-            setDropstargets(activecams,3);
-
-
-
+            LayoutGroup side = new LayoutGroup() { Orientation = Orientation.Vertical };
+            Groups.Add(side);
+            LayoutGroup side2 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true, Caption = "DropTarget1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            side.Add(side2);
+            LayoutGroup side3 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true, Caption = "DropTarget2", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            side.Add(side3);
         }
         void Create4CamView()
         {
             Groups.Clear();
             Groups.Orientation = Orientation.Vertical;
-            LayoutGroup top = new LayoutGroup() ;
-            Groups.Add( top);
+            LayoutGroup top = new LayoutGroup() {  };
+            Groups.Add(top);
+            LayoutGroup topleft = new LayoutGroup() { ShowCaption = true, Caption = "camera1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            top.Add(topleft);
+            LayoutGroup topRight = new LayoutGroup() { ShowCaption = true, Caption = "camera2", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            top.Add(topRight);
+
             
-            top.Add(new LayoutPanel());
-            top.Add(new LayoutPanel());
-            List<CameraContainer> activecams = cams.Where(c => c.bActive == true).ToList();
-            //add one for drop target
-            LayoutPanel second = new LayoutPanel();
-            LayoutPanel secondHist = new LayoutPanel();
-            top.Add(second);
-            top.Add(secondHist);
-                   
-            LayoutGroup bottom = new LayoutGroup() { Orientation = Orientation.Horizontal };
+            LayoutGroup bottom = new LayoutGroup() { Orientation = Orientation.Horizontal};
             Groups.Add(bottom);
-            LayoutPanel third = new LayoutPanel();
-            LayoutPanel thirdHist = new LayoutPanel();
-            bottom.Add(third);
-            bottom.Add(thirdHist);
-          
-            bottom.Add(new LayoutPanel());
-            bottom.Add(new LayoutPanel());
-            setDropstargets(activecams,4);
+            LayoutGroup side2 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true, Caption = "DropTarget1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            bottom.Add(side2);
+            LayoutGroup side3 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true, Caption = "DropTarget2", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            bottom.Add(side3);
+   //         setDropstargets(activecams,4);
 
 
         }
@@ -258,11 +245,35 @@ namespace DynamicOanels
 
         void PopulateView()
         {
-            panels.Clear();
-            WalkDownLogicalTree(((LayoutGroup)Groups) as DependencyObject);
+            allgroups.Clear();
+            FindGroups(((LayoutGroup)Groups) as DependencyObject);
             List<CameraContainer> activecams = cams.Where(c => c.bActive == true).ToList();
-            activecams.ForEach(x => Addframe(x,panels));
-         
+            int j = 0;
+            for(int i=0; i < allgroups.Count;i++)
+            {
+                if (allgroups[i].Caption != null)
+                {
+                    if (j == activecams.Count)
+                    {
+                        allgroups[i].AllowDrop = true;
+                        allgroups[i].Drop += TargetPanel_Drop;
+                        continue;
+                    }
+                   
+                    LayoutPanel prev = new LayoutPanel();
+                    prev.Content = activecams[j].preview;
+                    allgroups[i].Add(prev);
+                    LayoutPanel hist = new LayoutPanel();
+                    hist.Content = activecams[j].hist;
+                    allgroups[i].Add(hist);
+                    allgroups[i].Caption = activecams[j++].Name;
+                    //freepanels[0].Content = cam.preview;
+                    //freepanels[0].Caption = cam.Name;
+                    //freepanels[1].Content = cam.hist;
+                    //freepanels[1].Name = "hist" + cam.Name;
+
+                }
+            }
         }
         // find the first free panel and assign to the camera
         private void Addframe(CameraContainer cam, List<LayoutPanel> panels)
@@ -275,7 +286,7 @@ namespace DynamicOanels
             //camlist.Add(cam);
             cam.bActive = true;
             freepanels[0].Content = cam.preview;
-            freepanels[0].Name =  cam.Name;
+            freepanels[0].Caption =  cam.Name;
             freepanels[1].Content =  cam.hist;
             freepanels[1].Name = "hist" + cam.Name ; 
 
@@ -294,19 +305,36 @@ namespace DynamicOanels
            
             
         }
+        private void FindGroups(DependencyObject d)
+        {
+
+            System.Collections.IEnumerable logicalChildren = LogicalTreeHelper.GetChildren(d);
+            foreach (object obj in logicalChildren)
+            {
+                if (obj is LayoutGroup)
+                    allgroups.Add(obj as LayoutGroup);
+                if (obj is DependencyObject)
+                    FindGroups(obj as DependencyObject);
+            }
+
+
+        }
 
         void setDropstargets(List<CameraContainer> activecams,int nTotalPanels)
         {
-            panels.Clear();
-            WalkDownLogicalTree(((LayoutGroup)Groups) as DependencyObject);
+            allgroups.Clear();
+            FindGroups(((LayoutGroup)Groups) as DependencyObject);
             int inActive = nTotalPanels - activecams.Count;
             //set the panels that are not in preview state to drop targets         
             for (int i = activecams.Count; i < nTotalPanels; i++)
             {
-                panels[i * 2].AllowDrop = true;
-                panels[i * 2].Drop += TargetPanel_Drop;
-                panels[i * 2 + 1].Visibility = Visibility.Collapsed;
-                panels[i * 2].Name = string.Format("DropTarget{0}", i);
+                if (allgroups[i].Caption != null)
+                {
+                    allgroups[i].AllowDrop = true;
+                    allgroups[i].Drop += TargetPanel_Drop;
+                    //              panels[i * 2 + 1].Visibility = Visibility.Collapsed;
+                    //              allgroups[i ].Caption = string.Format("DropTarget{0}", i);
+                }
 
             }
         }
@@ -371,21 +399,27 @@ namespace DynamicOanels
             ImageEntity dragged = dataObj.GetData(typeof(ImageEntity)) as ImageEntity;
             CameraContainer selectedCam = cams.Where(c => c.Name == dragged.CameraName).SingleOrDefault();
             selectedCam.bActive = true;
-            LayoutPanel droppedOn = e.Source as LayoutPanel;
-            panels.Clear();
-            WalkDownLogicalTree(((LayoutGroup)Groups) as DependencyObject);
-            for(int y = 0;y < panels.Count;y++)
+            LayoutGroup droppedOn = e.Source as LayoutGroup;
+            allgroups.Clear();
+            FindGroups(((LayoutGroup)Groups) as DependencyObject);
+            for(int y = 0;y < allgroups.Count;y++)
             {
-                if (panels[y].Name == droppedOn.Name)
+                if (allgroups[y].Caption == droppedOn.Caption)
                 {
-                    panels[y].Name = selectedCam.Name;   //panel contains preview
-                    panels[y + 1].Visibility = Visibility.Visible;
-                    panels[y + 1].Content = selectedCam.hist;
-                    panels[y + 1].Name = "hist" + selectedCam.Name;
+                    LayoutPanel prev = new LayoutPanel();
+                    prev.Content = selectedCam.preview;
+                    allgroups[y].Add(prev);
+                    LayoutPanel hist = new LayoutPanel();
+                    hist.Content = selectedCam.hist;
+                    allgroups[y].Add(hist);
+                    allgroups[y].Caption = selectedCam.Name;   //panel contains preview
+                    //panels[y + 1].Visibility = Visibility.Visible;
+                    //panels[y + 1].Content = selectedCam.hist;
+                    //panels[y + 1].Name = "hist" + selectedCam.Name;
 
                 }
             }
-            droppedOn.Content = selectedCam.preview;
+ //           droppedOn.Content = selectedCam.preview;
             SetTrayImageToinUse(dragged);
         }
 
@@ -399,7 +433,7 @@ namespace DynamicOanels
             var itemsView = CollectionViewSource.GetDefaultView(LsImageGallery.ItemsSource);
             itemsView.Refresh();
         }
-
+        //reset the previewed camera to not active and close the associated histogram window
         void SetTrayImageToNotinPreview(LayoutPanel item)
         {
             CameraContainer selected = cams.Where(c => c.Name == item.Name).SingleOrDefault();
@@ -418,13 +452,7 @@ namespace DynamicOanels
                    
                 }
             }
-            //ImageEntity selected = ListImageObj.Where(c => c.CameraName == serialNum).SingleOrDefault();
-            //selected.bActive = true;
-            ////show the tray image as camera in preview mode
-            //selected.trayImage.ImagePath = File.ReadAllBytes("preview.png");
-            ////force a re-bind to update the gallery
-            //var itemsView = CollectionViewSource.GetDefaultView(LsImageGallery.ItemsSource);
-            //itemsView.Refresh();
+          
             }
 
 

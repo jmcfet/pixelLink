@@ -80,7 +80,11 @@ namespace DynamicOanels
             docMan.DockItemClosed += DocMan_DockItemClosed;
 
             nAttachedCams = getNumberAttachedCams();
-            
+            if (nAttachedCams == 0)
+            {
+                MessageBox.Show("no cameras");
+                return;
+            }
            
             LsImageGallery.DataContext = ListImageObj;
            
@@ -259,14 +263,8 @@ namespace DynamicOanels
                         allgroups[i].Drop += TargetPanel_Drop;
                         continue;
                     }
-                   
-                    LayoutPanel prev = new LayoutPanel();
-                    prev.Content = activecams[j].preview;
-                    allgroups[i].Add(prev);
-                    LayoutPanel hist = new LayoutPanel();
-                    hist.Content = activecams[j].hist;
-                    allgroups[i].Add(hist);
-                    allgroups[i].Caption = activecams[j++].Name;
+                    addViews(allgroups[i], activecams[j++]);
+                    //allgroups[i].Caption = activecams[j++].Name;
                     //freepanels[0].Content = cam.preview;
                     //freepanels[0].Caption = cam.Name;
                     //freepanels[1].Content = cam.hist;
@@ -274,6 +272,20 @@ namespace DynamicOanels
 
                 }
             }
+        }
+
+        private void addViews(LayoutGroup group,CameraContainer activecam)
+        {
+            LayoutPanel settings = new LayoutPanel();
+            settings.Content = activecam.settings;
+            group.Add(settings);
+            LayoutPanel prev = new LayoutPanel();
+            prev.Content = activecam.preview;
+            group.Add(prev);
+            LayoutPanel hist = new LayoutPanel();
+            hist.Content = activecam.hist;
+            group.Add(hist);
+            group.Caption = activecam.Name;   //panel contains preview
         }
         // find the first free panel and assign to the camera
         private void Addframe(CameraContainer cam, List<LayoutPanel> panels)
@@ -406,13 +418,8 @@ namespace DynamicOanels
             {
                 if (allgroups[y].Caption == droppedOn.Caption)
                 {
-                    LayoutPanel prev = new LayoutPanel();
-                    prev.Content = selectedCam.preview;
-                    allgroups[y].Add(prev);
-                    LayoutPanel hist = new LayoutPanel();
-                    hist.Content = selectedCam.hist;
-                    allgroups[y].Add(hist);
-                    allgroups[y].Caption = selectedCam.Name;   //panel contains preview
+                    addViews(allgroups[y], selectedCam);
+                    
                     //panels[y + 1].Visibility = Visibility.Visible;
                     //panels[y + 1].Content = selectedCam.hist;
                     //panels[y + 1].Name = "hist" + selectedCam.Name;

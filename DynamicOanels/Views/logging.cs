@@ -12,20 +12,28 @@ namespace Logging
         private Object thisLock = new Object();
         public LogFile()
         {
-            fileName = "C:\\TestLogData\\john.txt";
+            fileName = "C:\\PixelLink\\log.txt";
         }
         public LogFile(string fileName)
         {
             this.fileName = fileName;
         }
         ////Use LogFile to document the test run results
-        /// <summary>
+        /// <summaryfileName
         /// The MyLogFile method is used to document details of each test run.
         /// </summary>
         public void MyLogFile(string strCategory, string strMessage)
         {
             lock(thisLock)
             {
+                if (!File.Exists(fileName))
+                {
+                    using (FileStream fs = File.Create(fileName))
+                    {
+
+                    }
+                }
+
                 // Store the script names and test results in a output text file.
                 using (StreamWriter writer = new StreamWriter(new FileStream(fileName, FileMode.Append)))
                 {

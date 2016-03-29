@@ -93,7 +93,7 @@ namespace DynamicOanels
             settings = new Settings(this);
             LsImageGallery = gallery;
             trayImage = Tray;
-            
+           
             ReturnCode rc = Api.Initialize(serialNums[cameraNum], ref m_hCamera);
             if (cameraNum == 0)
                 bActive = true;

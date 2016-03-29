@@ -216,17 +216,22 @@ namespace DynamicOanels
             Groups.Orientation = Orientation.Vertical;
             LayoutGroup top = new LayoutGroup() { };
             Groups.Add(top);
-            LayoutGroup topleft = new LayoutGroup() { ShowCaption = true, Caption = "camera1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            LayoutGroup topleft = new LayoutGroup() { ShowCaption = true, Caption = "camera1" };
+            topleft.Add(new LayoutPanel());
             top.Add(topleft);
-            LayoutGroup topRight = new LayoutGroup() { ShowCaption = true, Caption = "camera2", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            LayoutGroup topRight = new LayoutGroup() { ShowCaption = true, Caption = "camera2" };
+            topRight.Add(new LayoutPanel());
             top.Add(topRight);
 
 
             LayoutGroup bottom = new LayoutGroup() { Orientation = Orientation.Horizontal };
+           
             Groups.Add(bottom);
-            LayoutGroup side2 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true, Caption = "DropTarget1", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            LayoutGroup side2 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true};
+            side2.Add(new LayoutPanel());
             bottom.Add(side2);
-            LayoutGroup side3 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true, Caption = "DropTarget2", ShowCloseButton = true, GroupBorderStyle = GroupBorderStyle.GroupBox };
+            LayoutGroup side3 = new LayoutGroup() { Orientation = Orientation.Horizontal, ShowCaption = true, Caption = "DropTarget2" };
+            side3.Add(new LayoutPanel());
             bottom.Add(side3);
             //         setDropstargets(activecams,4);
 

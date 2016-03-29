@@ -91,7 +91,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\DevExpress.Xpf.LayoutControl.v15.2.dll</HintPath>
     </Reference>
-    <Reference Include="PixeLINK.API">
+    <Reference Include="PixeLINK.API, Version=4.5.0.0, Culture=neutral, PublicKeyToken=d4530f58ae94fc5d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\PixelLink\PixeLINK.API.dll</HintPath>
     </Reference>
     <Reference Include="System" />

@@ -56,7 +56,7 @@
         <dxdo:LayoutGroup  Orientation="Horizontal" Grid.Row="1" >
 
             <dxdo:LayoutPanel ItemHeight="100" AllowDrag="true"  Caption="Panel9">
-                <ListBox x:Name="LsImageGallery" ItemsSource="{Binding}"  ItemTemplate="{DynamicResource ImageGalleryDataTemplate}" ItemsPanel="{DynamicResource ImageGalleryItemsPanelTemplate}">
+                <ListBox x:Name="LsImageGallery"   ItemTemplate="{DynamicResource ImageGalleryDataTemplate}" ItemsPanel="{DynamicResource ImageGalleryItemsPanelTemplate}">
                     <ListBox.Background>
                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                             <GradientStop Color="White"/>

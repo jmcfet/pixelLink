@@ -114,13 +114,12 @@ namespace DynamicOanels
             Api.GetCameraFeatures(m_hCamera, feature, ref features);
             return features;
         }
-        public CameraFeature SetFeature(float value)
+        public CameraFeature SetFeature(PixeLINK.Feature feature, float[] parms)
         {
             CameraFeature features = new CameraFeature();
-            float[] parms = new float[2];
-            parms[0] = value;
+           
             ReturnCode rc = Api.SetStreamState(m_hCamera, StreamState.Stop);
-            rc = Api.SetFeature(m_hCamera, Feature.FrameRate, FeatureFlags.Auto, 1, parms);
+            rc = Api.SetFeature(m_hCamera, feature, FeatureFlags.Auto, 1, parms);
             ((App)Application.Current).logger.MyLogFile("SetFeature ", "Stop /start camera ");
             //     rc = Api.SetStreamState(m_hCamera, StreamState.Start);
             //rc = Api.Uninitialize(m_hCamera);
@@ -196,29 +195,10 @@ namespace DynamicOanels
                 transfer.dataFormat = dataFormat;
                 transfer.frameDesc = frameDesc;
                 transfer.hCamera = hCamera;
-                int destBufferSize = 0;
-              
-                //                  ((App)Application.Current).logger.MyLogFile("PixelThread ", string.Format("Thread 1 {0:N0} bytes {1}", GC.GetTotalMemory(false), numPixels));
-                //   really should not need the worker thread but put this in to keep the camera red lite off
 
-                //        ThreadPool.QueueUserWorkItem(Work1, transfer);
-                Api.FormatImage(transfer.bits, ref transfer.frameDesc, ImageFormat.Bmp, null, ref destBufferSize);
-//                if (FormattedBuf == null)
-                    FormattedBuf = new byte[destBufferSize];
-                Api.FormatImage(transfer.bits, ref transfer.frameDesc, ImageFormat.Bmp, FormattedBuf, ref destBufferSize);
-                MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-                byte[] hash = md5.ComputeHash(FormattedBuf);
-               ((App)Application.Current).logger.MyLogFile("hash ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(hash)));
-                if (this.bActive == true)
-                {
-                    preview.Work(FormattedBuf);
-                    hist.Work(transfer);
-                    return 1;
-                }
-                Application.Current.Dispatcher.Invoke(
-                      DispatcherPriority.Background,
-                          new Action(() => showBuffer(FormattedBuf)));
-
+               //really should not need the worker thread but put this in to keep the camera red lite off
+                ThreadPool.QueueUserWorkItem(Work1, transfer);
+ 
 
                 return 1;
             }
@@ -233,28 +213,33 @@ namespace DynamicOanels
             ((App)Application.Current).logger.MyLogFile("showbuffer hash ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(hash)));
 
             trayImage.ImagePath = FormattedBuf;
-                //force a re-bind to update the gallery
-                var itemsView = CollectionViewSource.GetDefaultView(LsImageGallery.ItemsSource);
-                itemsView.Refresh();
-                ((App)Application.Current).logger.MyLogFile("rendered ", trayImage.CameraName);
+           ((App)Application.Current).logger.MyLogFile("rendered ", trayImage.CameraName);
 
         }
         void Work1(object state)
         {
-
+            int destBufferSize = 0;
             TransferBits transfer = state as TransferBits; ;
 
-            //((App)Application.Current)._wh.WaitOne();
-            //Console.WriteLine("WorkerQueue signalled!");
+            Api.FormatImage(transfer.bits, ref transfer.frameDesc, ImageFormat.Bmp, null, ref destBufferSize);
+            //                if (FormattedBuf == null)
+            FormattedBuf = new byte[destBufferSize];
+            Api.FormatImage(transfer.bits, ref transfer.frameDesc, ImageFormat.Bmp, FormattedBuf, ref destBufferSize);
+            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            byte[] hash = md5.ComputeHash(FormattedBuf);
+            ((App)Application.Current).logger.MyLogFile("hash ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(hash)));
+            if (this.bActive == true)
+            {
+                preview.Work(FormattedBuf);
+                hist.Work(transfer);
+                return ;
+            }
+            Application.Current.Dispatcher.Invoke(
+                  DispatcherPriority.Render,
+                      new Action(() => showBuffer(FormattedBuf)));
+
 
             ((App)Application.Current).logger.MyLogFile("WorkThread ", String.Format(" Memory: {0:N0} bytes cam {1}  frame {2}", GC.GetTotalMemory(false), transfer.hCamera, transfer.frameDesc.FrameNumber));
-
-
-            //display the image by streaming the bits into our image control but using the
-            //the dispatcher to access the UI thread
-
-            //preview.Work(FormattedBuf);
-            //hist.Work(trans);
 
 
 

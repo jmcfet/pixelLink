@@ -125,9 +125,18 @@ namespace Views
 
         private void FrameRateValue_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            string value = FrameRateSet.Text;
-            float test = float.Parse(value);
-            cam.SetFeature(float.Parse(value));
+           
+            float[] parms = new float[2];
+            parms[0] = float.Parse(FrameRateSet.Text);
+            cam.SetFeature(Feature.FrameRate,parms);
+        }
+
+        private void Exposure_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            float[] parms = new float[2];
+            parms[0] = float.Parse(FrameRateSet.Text);
+            cam.SetFeature(Feature.Exposure, parms);
+
         }
     }
 }

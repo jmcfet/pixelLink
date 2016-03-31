@@ -486,30 +486,7 @@ namespace DynamicOanels
 
 
 
-        private void MenuItemAddBottomClicked(object sender, RoutedEventArgs e)
-        {
-
-            LayoutGroup layoutGroup2 = new LayoutGroup() { Orientation = Orientation.Horizontal };
-            Groups.Add(layoutGroup2);
-
-            //    < dxdo:LayoutGroup Orientation = "Vertical" >
-            //LayoutGroup layoutGroup11 = new LayoutGroup() { Orientation = Orientation.Horizontal };
-
-            //     < dxdo:LayoutPanel Caption = "Panel1" />
-            LayoutPanel layoutPanel1 = new LayoutPanel();
-            Preview cam = new Preview();
-            camlist.Add(cam);
-            layoutPanel1.Content = cam;
-            layoutGroup2.Add(layoutPanel1);
-
-            LayoutPanel layoutPanel2 = new LayoutPanel();
-            Histogram hist = new Histogram();
-            hists.Add(hist);
-            layoutPanel2.Content = hist;
-            layoutGroup2.Add(layoutPanel2);
-
-
-        }
+    
 
 
 

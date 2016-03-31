@@ -8,7 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace test
+namespace Views
 {
     public class ResizingAdorner : Adorner
     {

@@ -87,7 +87,7 @@ namespace DynamicOanels
 
         public CameraContainer(int cameraNum, ImageEntity Tray, ListBox gallery)
         {
-            preview = new Preview();
+            preview = new Preview(this);
             camNum = cameraNum;
              hist = new Histogram();
             settings = new Settings(this);
@@ -114,12 +114,25 @@ namespace DynamicOanels
             Api.GetCameraFeatures(m_hCamera, feature, ref features);
             return features;
         }
+        public float[] GetFeatureByParms(PixeLINK.Feature feature)
+        {
+            FeatureFlags flags = 0;
+            int numParms = 4;
+            float[] parms = new float[numParms];
+            Api.GetFeature(m_hCamera, feature, ref flags, ref numParms, parms);
+            return parms;
+        }
         public CameraFeature SetFeature(PixeLINK.Feature feature, float[] parms)
         {
             CameraFeature features = new CameraFeature();
            
             ReturnCode rc = Api.SetStreamState(m_hCamera, StreamState.Stop);
-            rc = Api.SetFeature(m_hCamera, feature, FeatureFlags.Auto, 1, parms);
+            int tt = parms.Count();
+            rc = Api.SetFeature(m_hCamera, feature, FeatureFlags.Manual, parms.Count(), parms);
+            if (rc != ReturnCode.Success)
+            {
+                MessageBox.Show("bad parm");
+            }
             ((App)Application.Current).logger.MyLogFile("SetFeature ", "Stop /start camera ");
             //     rc = Api.SetStreamState(m_hCamera, StreamState.Start);
             //rc = Api.Uninitialize(m_hCamera);
@@ -129,6 +142,17 @@ namespace DynamicOanels
             Api.SetStreamState(m_hCamera, StreamState.Start);
             return features;
         }
+
+        public void StopCamera()
+        {
+            ReturnCode rc = Api.SetStreamState(m_hCamera, StreamState.Stop);
+        }
+
+        public void StartCamera()
+        {
+            ReturnCode rc = Api.SetStreamState(m_hCamera, StreamState.Start);
+        }
+
         [HandleProcessCorruptedStateExceptions]
         public int MyCallbackFunction(int hCamera, System.IntPtr pBuf, PixeLINK.PixelFormat dataFormat, ref FrameDescriptor frameDesc, int userData)
         {
@@ -231,7 +255,7 @@ namespace DynamicOanels
             if (this.bActive == true)
             {
                 preview.Work(FormattedBuf);
-                hist.Work(transfer);
+ //               hist.Work(transfer);
                 return ;
             }
             Application.Current.Dispatcher.Invoke(

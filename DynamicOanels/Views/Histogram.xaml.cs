@@ -162,7 +162,7 @@ namespace Views
             UpdateBayersTotals(m_elts, counts);
             CreateGRBGarray(transfer.dataFormat, counts, countsGRBG);
             UpdateBayerRGBTotals(m_elts, countsGRBG);
-            Console.WriteLine("Elments calc");
+ //           Console.WriteLine("Elments calc");
 
 
             return m_elts;
@@ -292,7 +292,7 @@ namespace Views
         void DataUpdated(HistElt[] m_elts)
         {
           
-            Console.WriteLine(String.Format("  DataUpdated Memory: {0:N0} bytes (starting memory)", GC.GetTotalMemory(false)));
+  //          Console.WriteLine(String.Format("  DataUpdated Memory: {0:N0} bytes (starting memory)", GC.GetTotalMemory(false)));
             int iSeries = 0;
             LineSeries2D currentSeries;
 
@@ -364,7 +364,7 @@ namespace Views
                 //             m_elts[i].mean = m_elts[i].stddev = 0;
                 //        }
             }
-            Console.WriteLine(String.Format("  end DataUpdated Memory: {0:N0} bytes (starting memory)", GC.GetTotalMemory(false)));
+ //           Console.WriteLine(String.Format("  end DataUpdated Memory: {0:N0} bytes (starting memory)", GC.GetTotalMemory(false)));
         }
         void setDataFormat(PixeLINK.PixelFormat dataFormat, HistElt[] m_elts)
         {

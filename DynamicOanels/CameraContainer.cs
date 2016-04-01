@@ -127,7 +127,6 @@ namespace DynamicOanels
             CameraFeature features = new CameraFeature();
            
             ReturnCode rc = Api.SetStreamState(m_hCamera, StreamState.Stop);
-            int tt = parms.Count();
             rc = Api.SetFeature(m_hCamera, feature, FeatureFlags.Manual, parms.Count(), parms);
             if (rc != ReturnCode.Success)
             {

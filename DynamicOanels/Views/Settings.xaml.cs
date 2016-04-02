@@ -78,20 +78,36 @@ namespace Views
 
         private void Settings_Loaded(object sender, RoutedEventArgs e)
         {
+           
             CameraFeature feature = cam.GetFeature(Feature.Shutter);
             Exposure.Minimum = feature.parameters[0].MinimumValue * 1000;
             Exposure.Maximum = feature.parameters[0].MaximumValue * 1000;
             float [] parms = cam.GetFeatureByParms(Feature.Shutter);
             ExposureSet.Text = (parms[0] * 1000).ToString();
-            feature = cam.GetFeature(Feature.FrameRate);
-            FrameRateValue.Minimum = feature.parameters[0].MinimumValue;
-            FrameRateValue.Maximum = feature.parameters[0].MaximumValue;
-            parms = cam.GetFeatureByParms(Feature.FrameRate);
-            FrameRateSet.Text = parms[0].ToString();
+
+            setFeature(Feature.FrameRate, FrameRateValue, FrameRateSet);
+            //FrameRateValue.Minimum = feature.parameters[0].MinimumValue;
+            //FrameRateValue.Maximum = feature.parameters[0].MaximumValue;
+            //parms = cam.GetFeatureByParms(Feature.FrameRate);
+            //FrameRateSet.Text = parms[0].ToString();
+            setFeature(Feature.Gain, GainValue, gainActual);
+            setFeature(Feature.Saturation, SaturationValue, SaturationActual);
+            setFeature(Feature.Gamma, GammaValue, GammaActual);
+            setFeature(Feature.WhiteShading, slColorR, red);
+            setFeature(Feature.WhiteShading, slColorG, green);
+            setFeature(Feature.WhiteShading, slColorB, blue);
+
 
         }
 
- 
+        void setFeature(PixeLINK.Feature feature,Slider slider,TextBox box)
+        {
+            CameraFeature camfeature = cam.GetFeature(feature);
+            slider.Minimum = camfeature.parameters[0].MinimumValue;
+            slider.Maximum = camfeature.parameters[0].MaximumValue;
+            float[] parms = cam.GetFeatureByParms(feature);
+            box.Text = parms[0].ToString();
+        }
 
         private void FrameRateValue_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {

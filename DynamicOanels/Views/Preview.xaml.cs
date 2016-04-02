@@ -32,8 +32,16 @@ namespace Views
    
     public partial class Preview : UserControl
     {
-        
-        AdornerLayer aLayer;
+        public enum rectSides
+        {
+            left = 0,
+            top = 1,
+            width = 2,
+            height = 3,
+        }
+
+
+            AdornerLayer aLayer;
 
         bool _isDown = false;
         bool _isDragging;
@@ -91,10 +99,10 @@ namespace Views
             roi.MouseLeftButtonDown += new MouseButtonEventHandler(Window1_MouseLeftButtonDown);
             roi.MouseLeftButtonUp += new MouseButtonEventHandler(DragFinishedMouseHandler);
             RoiSizes = cam.GetFeatureByParms(Feature.Roi);
-            top.Text = RoiSizes[0].ToString();
-            left.Text = RoiSizes[1].ToString();
-            width.Text = RoiSizes[2].ToString();
-            height.Text = RoiSizes[3].ToString();
+            top.Text = RoiSizes[(int)rectSides.top].ToString();
+            left.Text = RoiSizes[(int)rectSides.left].ToString();
+            width.Text = RoiSizes[(int)rectSides.width].ToString();
+            height.Text = RoiSizes[(int)rectSides.height].ToString();
             selected = true;
            
            
@@ -152,12 +160,13 @@ namespace Views
   //              return;
             }
            
-            scaleX = RoiSizes[2] / (float)still.Width;
-            scaleY = RoiSizes[3] / (float)still.Height;
-            RoiSizes[0] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
-            RoiSizes[1] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
-            RoiSizes[2] = (float)Math.Round(roi.Width * scaleX);
-            RoiSizes[3] = (float)Math.Round(roi.Height * scaleY);
+            scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
+            scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
+            RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
+            RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
+            
+            RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
+            RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
             cam.SetFeature(Feature.Roi, RoiSizes);
            
             Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
@@ -166,10 +175,10 @@ namespace Views
                aLayer.Remove(toRemoveArray[0]);
             }
             roi.Visibility = Visibility.Hidden;
-            top.Text = RoiSizes[0].ToString();
-            left.Text = RoiSizes[1].ToString();
-            width.Text = RoiSizes[2].ToString();
-            height.Text = RoiSizes[3].ToString();
+            top.Text = RoiSizes[(int)rectSides.top].ToString();
+            left.Text = RoiSizes[(int)rectSides.left].ToString();
+            width.Text = RoiSizes[(int)rectSides.width].ToString();
+            height.Text = RoiSizes[(int)rectSides.height].ToString();
             cam.StartCamera();
             e.Handled = true;
         }
@@ -227,10 +236,10 @@ namespace Views
         private void Reset_ItemClick(object sender, DevExpress.Xpf.Bars.ItemClickEventArgs e)
         {
  
-            RoiSizes[0] = 0;
-            RoiSizes[1] = 0;
-            RoiSizes[2] = 2048;
-            RoiSizes[3] = 2048;
+            RoiSizes[0] = 0;    //left
+            RoiSizes[1] = 0;    //top
+            RoiSizes[2] = 1280;  //width
+            RoiSizes[3] = 1024;   //height
             cam.SetFeature(Feature.Roi, RoiSizes);
         }
         //this thread will pull work of of myQueue and update the UI using Dispatcher.Invoke

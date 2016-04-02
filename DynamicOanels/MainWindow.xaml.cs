@@ -37,30 +37,22 @@ namespace DynamicOanels
     public partial class MainWindow : Window
     {
 
-        private int m_hCamera = 0;
-        static Api.Callback s_callbackDelegate;
-        private System.Timers.Timer _timer;
+        
         public Views.Target target = null;
         List<Preview> camlist = new List<Preview>();
         List<Histogram> hists = new List<Histogram>();
         private Object thisLock = new Object();
         private Object camera1Lock = new Object();
         private List<CameraContainer> cams = new List<CameraContainer>();
-        //LayoutPanel targetPanel = null;
-        LayoutPanel histPanel = null;
-        LayoutPanel targetPanel = null;
+               
         List<LayoutPanel> panels = new List<LayoutPanel>();
         List<LayoutGroup> allgroups = new List<LayoutGroup>();
 
-        long m_startframetime = (0x7FFFFFFFL);
-        int m_startframe = 0;
-        double m_rate = 0;
-        TransferBits transfer = null;
+       
         LayoutGroup Groups = null;
         List<TransferBits> fake = new List<TransferBits>();
         ObservableCollection<ImageEntity> ListImageObj = new ObservableCollection<ImageEntity>();
-        int iCaptured = 0;
-        int iCurrent = 0;
+        
         int nAttachedCams = 0;
 
 

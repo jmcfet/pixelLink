@@ -254,7 +254,7 @@ namespace DynamicOanels
             if (this.bActive == true)
             {
                 preview.Work(FormattedBuf);
- //               hist.Work(transfer);
+                hist.Work(transfer);
                 return ;
             }
             Application.Current.Dispatcher.Invoke(

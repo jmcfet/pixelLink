@@ -30,7 +30,7 @@
                         </dxc:AxisY2D.WholeRange>
                     </dxc:AxisY2D>
                 </dxc:XYDiagram2D.AxisY>
-                <dxc:LineSeries2D x:Name="series1" />
+                <dxc:LineSeries2D x:Name="series1" Background="Aquamarine" />
                 <dxc:LineSeries2D x:Name="series2" />
                 <dxc:LineSeries2D x:Name="series3" />
             </dxc:XYDiagram2D>

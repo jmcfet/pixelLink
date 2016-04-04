@@ -131,8 +131,33 @@ namespace Views
             parms = cam.GetFeatureByParms(Feature.FrameRate);
             FrameRateSet.Text = parms[0].ToString();
         }
-       
 
+        private void GainValue_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+
+            float[] parms = new float[2];
+            parms[0] = float.Parse(gainActual.Text);
+            cam.SetFeature(Feature.Gain, parms);
+
+        }
+
+        private void SaturationValue_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            float[] parms = new float[2];
+            parms[0] = float.Parse(SaturationActual.Text);
+            cam.SetFeature(Feature.Saturation, parms);
+
+
+        }
+
+        private void GammaValue_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            
+            float[] parms = new float[2];
+            parms[0] = float.Parse(GammaActual.Text);
+            cam.SetFeature(Feature.Gamma, parms);
+
+        }
     }
 
     public class RoundConvertor : IValueConverter

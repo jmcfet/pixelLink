@@ -313,11 +313,20 @@ namespace Views
                     }
 
                     if (iSeries == 0)
+                    {
                         currentSeries = series1;
+                        currentSeries.Brush = new SolidColorBrush(Colors.Red);
+                    }
                     else if (iSeries == 1)
+                    {
                         currentSeries = series2;
+                        currentSeries.Brush = new SolidColorBrush(Colors.Green);
+                    }
                     else
+                    {
                         currentSeries = series3;
+                        currentSeries.Brush = new SolidColorBrush(Colors.Blue);
+                    }
                     iSeries++;
 
                     currentSeries.Points.BeginInit();

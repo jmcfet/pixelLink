@@ -12,9 +12,9 @@
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="32*"/>
-            <RowDefinition Height="289*"/>
-            <RowDefinition Height="100*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
 
@@ -32,12 +32,20 @@
             <Image x:Name="still" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"  Canvas.Left="0" Canvas.Top="0"  >
 
             </Image>
+            <Border Height="100" Width="100" Canvas.Top="100" Canvas.Left="50" BorderBrush="White" BorderThickness="1" >
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Frame rate" Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
+                    <Label Content="Exposure " Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
+                    <Label Content="Gain" Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
+                    <Label Content="Sat " Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
+                </StackPanel>
+            </Border>
             <Rectangle x:Name="roi" Fill="Transparent"  HorizontalAlignment="Left" Height="100" Stroke="White" VerticalAlignment="Top" Width="100" Canvas.Top="0" Canvas.Left="0" Visibility="Collapsed"/>
 
         </Canvas>
 
         <!--</Border>-->
-        <Grid Grid.Row="2" Visibility="Visible" >
+        <Grid Grid.Row="2" Name="RoiValues" Visibility="Hidden" >
            <StackPanel Orientation="Horizontal">
             <TextBox    Height="40" Width="63" x:Name="left"  BorderBrush="black" Text="10"/>
                 <TextBox    Height="40" Width="63" x:Name="top" BorderBrush="black" />

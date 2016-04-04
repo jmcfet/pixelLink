@@ -46,10 +46,7 @@
                     </Grid.ColumnDefinitions>
                     <Slider Grid.Column="0" Name="GainValue" VerticalAlignment="Center"
                                     HorizontalAlignment="Stretch"
-                                   
-                                    TickPlacement="None"
-                                    Minimum="0"
-                                    Maximum="18.06"
+                                   PreviewMouseUp="GainValue_PreviewMouseUp"
                                     SmallChange="1"
                                     LargeChange="2"
                                     />
@@ -65,10 +62,7 @@
                     </Grid.ColumnDefinitions>
                     <Slider Grid.Column="0" Name="SaturationValue" VerticalAlignment="Center"
                                     HorizontalAlignment="Stretch"
-                                   
-                                    TickPlacement="None"
-                                    Minimum="0"
-                                    Maximum="200"
+                                   PreviewMouseUp="SaturationValue_PreviewMouseUp"
                                     SmallChange="1"
                                     LargeChange="2"
                                     />
@@ -84,10 +78,7 @@
                     </Grid.ColumnDefinitions>
                     <Slider Grid.Column="0" Name="GammaValue" VerticalAlignment="Center"
                                     HorizontalAlignment="Stretch"
-                                   
-                                    TickPlacement="None"
-                                    Minimum="0"
-                                    Maximum="200"
+                                    PreviewMouseUp="GammaValue_PreviewMouseUp"
                                     SmallChange="1"
                                     LargeChange="2"
                                     />

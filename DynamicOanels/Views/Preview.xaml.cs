@@ -241,6 +241,7 @@ namespace Views
             RoiSizes[2] = 1280;  //width
             RoiSizes[3] = 1024;   //height
             cam.SetFeature(Feature.Roi, RoiSizes);
+            RoiValues.Visibility = Visibility.Visible;
         }
         //this thread will pull work of of myQueue and update the UI using Dispatcher.Invoke
         public void Work(byte[] dstBuf)
@@ -280,7 +281,10 @@ namespace Views
             return hex.ToString();
         }
 
-        
+        private void bROI_ItemClick(object sender, DevExpress.Xpf.Bars.ItemClickEventArgs e)
+        {
+
+        }
     }
 
 

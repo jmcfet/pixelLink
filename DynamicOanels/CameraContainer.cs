@@ -1,4 +1,5 @@
-﻿using PixeLINK;
+﻿using DynamicOanels.Views;
+using PixeLINK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace DynamicOanels
 
         }
         //      public Preview preview { get; set; }
-        public Settings settings = null;
+        public settingsContainer settings = null;
         public Preview preview = null;
         public Histogram hist { get; set; }
         public ImageEntity trayImage { get; set; }
@@ -90,7 +91,7 @@ namespace DynamicOanels
             preview = new Preview(this);
             camNum = cameraNum;
              hist = new Histogram();
-            settings = new Settings(this);
+            settings = new settingsContainer(this);
             LsImageGallery = gallery;
             trayImage = Tray;
            

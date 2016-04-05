@@ -109,11 +109,12 @@ namespace DynamicOanels
             Api.SetStreamState(m_hCamera, StreamState.Start);
             
         }
-        public CameraFeature GetFeature(PixeLINK.Feature feature)
+        public ReturnCode GetFeature(PixeLINK.Feature feature,ref CameraFeature features)
         {
-            CameraFeature features = new CameraFeature();
-            Api.GetCameraFeatures(m_hCamera, feature, ref features);
-            return features;
+           
+            ReturnCode rc = Api.GetCameraFeatures(m_hCamera, feature, ref features);
+           
+            return rc;
         }
         public float[] GetFeatureByParms(PixeLINK.Feature feature)
         {

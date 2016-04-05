@@ -78,33 +78,40 @@ namespace Views
 
         private void Settings_Loaded(object sender, RoutedEventArgs e)
         {
-           
-            CameraFeature feature = cam.GetFeature(Feature.Shutter);
-            Exposure.Minimum = feature.parameters[0].MinimumValue * 1000;
-            Exposure.Maximum = feature.parameters[0].MaximumValue * 1000;
-            float [] parms = cam.GetFeatureByParms(Feature.Shutter);
-            ExposureSet.Text = (parms[0] * 1000).ToString();
+            GetandSetFeature(Feature.Shutter, Exposure, ExposureSet,1000);
+            GetandSetFeature(Feature.FrameRate, FrameRateValue, FrameRateSet,1);
 
-            setFeature(Feature.FrameRate, FrameRateValue, FrameRateSet);
-            //FrameRateValue.Minimum = feature.parameters[0].MinimumValue;
-            //FrameRateValue.Maximum = feature.parameters[0].MaximumValue;
-            //parms = cam.GetFeatureByParms(Feature.FrameRate);
-            //FrameRateSet.Text = parms[0].ToString();
-            setFeature(Feature.Gain, GainValue, gainActual);
-            setFeature(Feature.Saturation, SaturationValue, SaturationActual);
-            setFeature(Feature.Gamma, GammaValue, GammaActual);
-            setFeature(Feature.WhiteShading, slColorR, red);
-            setFeature(Feature.WhiteShading, slColorG, green);
-            setFeature(Feature.WhiteShading, slColorB, blue);
+            GetandSetFeature(Feature.Gain, GainValue, gainActual,1);
+            GetandSetFeature(Feature.Saturation, SaturationValue, SaturationActual,1);
+            GetandSetFeature(Feature.Gamma, GammaValue, GammaActual,1);
+            GetandSetFeature(Feature.WhiteShading, slColorR, red,1);
+            GetandSetFeature(Feature.WhiteShading, slColorG, green,1);
+            GetandSetFeature(Feature.WhiteShading, slColorB, blue,1);
 
 
         }
-
+        void GetandSetFeature(PixeLINK.Feature feature, Slider slider, TextBox box, float multiplier)
+        {
+            CameraFeature features = new CameraFeature();
+            ReturnCode rc = cam.GetFeature(feature, ref features);
+            if (rc == ReturnCode.NotSupportedError)
+            {
+                slider.IsEnabled = false;
+                return;
+            }
+            slider.Minimum = features.parameters[0].MinimumValue * multiplier;
+            slider.Maximum = features.parameters[0].MaximumValue * multiplier;
+            float[] parms = cam.GetFeatureByParms(feature);
+            box.Text = (parms[0] * multiplier).ToString();
+        }
         void setFeature(PixeLINK.Feature feature,Slider slider,TextBox box)
         {
-            CameraFeature camfeature = cam.GetFeature(feature);
-            slider.Minimum = camfeature.parameters[0].MinimumValue;
-            slider.Maximum = camfeature.parameters[0].MaximumValue;
+            CameraFeature features = new CameraFeature();
+            ReturnCode rc =  cam.GetFeature(feature,ref features);
+            if (rc == ReturnCode.NotSupportedError)
+                return;
+            slider.Minimum = features.parameters[0].MinimumValue;
+            slider.Maximum = features.parameters[0].MaximumValue;
             float[] parms = cam.GetFeatureByParms(feature);
             box.Text = parms[0].ToString();
         }

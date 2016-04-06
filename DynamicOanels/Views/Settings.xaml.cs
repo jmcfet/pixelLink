@@ -74,6 +74,7 @@ namespace Views
             this.cam = cam;
 
             Loaded += Settings_Loaded;
+           
         }
 
         private void Settings_Loaded(object sender, RoutedEventArgs e)
@@ -116,9 +117,14 @@ namespace Views
             box.Text = parms[0].ToString();
         }
 
-        private void FrameRateValue_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void Exposure_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-
+            double val = Math.Round((double)e.NewValue,5);
+            if (val <= Math.Round(Exposure.Minimum,5))
+                val = Exposure.Minimum;
+            else
+                val = Math.Round(val);
+            ExposureSet.Text = val.ToString();
 
         }
 
@@ -134,6 +140,11 @@ namespace Views
         {
             float[] parms = new float[4];
             parms[0] = float.Parse(ExposureSet.Text) / 1000;
+            if (parms[0] < Exposure.Minimum)
+            {
+                parms[0] = (float)Exposure.Minimum;
+                ExposureSet.Text = parms[0].ToString();
+            }
             cam.SetFeature(Feature.Shutter, parms);
             parms = cam.GetFeatureByParms(Feature.FrameRate);
             FrameRateSet.Text = parms[0].ToString();
@@ -180,4 +191,5 @@ namespace Views
             return value;
         }
     }
+  
 }

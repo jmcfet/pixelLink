@@ -14,6 +14,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <local:RoundConvertor x:Key="stringconverter" />
+       
     </UserControl.Resources>
     <Grid>
        
@@ -29,12 +30,12 @@
                                     HorizontalAlignment="Stretch"
                                    
                                     TickPlacement="None"
-                                   
+                                    ValueChanged="Exposure_ValueChanged"
                                     SmallChange="1"
                                     LargeChange="2"
                                     PreviewMouseUp="Exposure_PreviewMouseUp"
                                     />
-                    <TextBox Grid.Column="1" Name="ExposureSet" Text="{Binding ElementName=Exposure, Path=Value, Converter={StaticResource stringconverter}, UpdateSourceTrigger=PropertyChanged}"  ></TextBox>
+                    <TextBox Grid.Column="1" Name="ExposureSet" Text="{Binding ElementName=Exposure, Path=Value, UpdateSourceTrigger=PropertyChanged}"  ></TextBox>
                 </Grid>
             </StackPanel>
             <StackPanel>

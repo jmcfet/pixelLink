@@ -14,7 +14,13 @@
             <dx:DXTabItem Header="Settings" Name="settingsControls">
                 
             </dx:DXTabItem>
-            <dx:DXTabItem Header="Page 2">
+            <dx:DXTabItem Header="Triggers">
+                <Label Content="DXTabControl"/>
+            </dx:DXTabItem>
+            <dx:DXTabItem Header="Effects">
+                <Label Content="DXTabControl"/>
+            </dx:DXTabItem>
+            <dx:DXTabItem Header="LUT">
                 <Label Content="DXTabControl"/>
             </dx:DXTabItem>
         </dx:DXTabControl>

@@ -98,6 +98,9 @@ namespace Views
             roi.MouseMove += new MouseEventHandler(Window1_MouseMove);
             roi.MouseLeftButtonDown += new MouseButtonEventHandler(Window1_MouseLeftButtonDown);
             roi.MouseLeftButtonUp += new MouseButtonEventHandler(DragFinishedMouseHandler);
+            this.KeyDown += new KeyEventHandler(roi_KeyDown);
+            //         roi.PreviewKeyUp += Roi_PreviewKeyUp;
+            roi.Focusable = true;
             RoiSizes = cam.GetFeatureByParms(Feature.Roi);
             top.Text = RoiSizes[(int)rectSides.top].ToString();
             left.Text = RoiSizes[(int)rectSides.left].ToString();
@@ -125,9 +128,13 @@ namespace Views
            
             roi.Width = myCanvas.ActualWidth * .60;
             roi.Visibility = Visibility.Visible;
+           
             cam.StopCamera();
 
         }
+
+     
+
         void Window1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Console.WriteLine("Window1_MouseLeftButtonDown");
@@ -151,35 +158,35 @@ namespace Views
         // Handler for drag stopping on user choise
         void DragFinishedMouseHandler(object sender, MouseButtonEventArgs e)
         {
-            Console.WriteLine("DragFinishedMouseHandler");
-            if (_isDown)
-            {
-                Console.WriteLine("DragFinishedMouseHandler _isDown");
-                _isDown = false;
-                _isDragging = false;
-  //              return;
-            }
-           
-            scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
-            scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
-            RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
-            RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
-            
-            RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
-            RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
-            cam.SetFeature(Feature.Roi, RoiSizes);
-           
-            Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
-            if (toRemoveArray != null)
-            {
-               aLayer.Remove(toRemoveArray[0]);
-            }
-            roi.Visibility = Visibility.Hidden;
-            top.Text = RoiSizes[(int)rectSides.top].ToString();
-            left.Text = RoiSizes[(int)rectSides.left].ToString();
-            width.Text = RoiSizes[(int)rectSides.width].ToString();
-            height.Text = RoiSizes[(int)rectSides.height].ToString();
-            cam.StartCamera();
+            //          Console.WriteLine("DragFinishedMouseHandler");
+            //if (_isDown)
+            //{
+            //    Console.WriteLine("DragFinishedMouseHandler _isDown");
+            //    _isDown = false;
+            //    _isDragging = false;
+            //    //              return;
+            //}
+
+            //scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
+            //scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
+            //RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
+            //RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
+
+            //RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
+            //RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
+            //cam.SetFeature(Feature.Roi, RoiSizes);
+
+            //Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
+            //if (toRemoveArray != null)
+            //{
+            //    aLayer.Remove(toRemoveArray[0]);
+            //}
+            //roi.Visibility = Visibility.Hidden;
+            //top.Text = RoiSizes[(int)rectSides.top].ToString();
+            //left.Text = RoiSizes[(int)rectSides.left].ToString();
+            //width.Text = RoiSizes[(int)rectSides.width].ToString();
+            //height.Text = RoiSizes[(int)rectSides.height].ToString();
+            //cam.StartCamera();
             e.Handled = true;
         }
 
@@ -281,9 +288,36 @@ namespace Views
             return hex.ToString();
         }
 
-        private void bROI_ItemClick(object sender, DevExpress.Xpf.Bars.ItemClickEventArgs e)
+        private void roi_KeyDown(object sender, KeyEventArgs e)
         {
+            if (_isDown)
+            {
+                Console.WriteLine("DragFinishedMouseHandler _isDown");
+                _isDown = false;
+                _isDragging = false;
+                //              return;
+            }
+            scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
+            scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
+            RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
+            RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
 
+            RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
+            RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
+            cam.SetFeature(Feature.Roi, RoiSizes);
+
+            Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
+            if (toRemoveArray != null)
+            {
+                aLayer.Remove(toRemoveArray[0]);
+            }
+            roi.Visibility = Visibility.Hidden;
+            top.Text = RoiSizes[(int)rectSides.top].ToString();
+            left.Text = RoiSizes[(int)rectSides.left].ToString();
+            width.Text = RoiSizes[(int)rectSides.width].ToString();
+            height.Text = RoiSizes[(int)rectSides.height].ToString();
+            cam.StartCamera();
+            e.Handled = true;
         }
     }
 

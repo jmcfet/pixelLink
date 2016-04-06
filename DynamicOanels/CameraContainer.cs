@@ -159,6 +159,8 @@ namespace DynamicOanels
         {
             lock (thisLock)
             {
+                if (Application.Current == null)
+                    return 0;
                 ((App)Application.Current).logger.MyLogFile("MyCallbackFunction ", string.Format("camera {0} threadid {1} ", hCamera, Thread.CurrentThread.ManagedThreadId));
                 // Calculate actual framerate.
                 long curtime = (long)(frameDesc.FrameTime * 1000);

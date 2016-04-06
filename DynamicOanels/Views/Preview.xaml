@@ -27,7 +27,7 @@
         <!--<Border Grid.Row="1" Background="LightBlue" BorderBrush="Black" BorderThickness="2" Padding="15" Margin="0,0,-0.333,-0.334" Grid.RowSpan="2"  >-->
 
 
-        <Canvas Grid.Row="1" Name="myCanvas" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
+        <Canvas Grid.Row="1" Name="myCanvas" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
             <!--<Button x:Name="button" Content="Stream" Click="grab_Click" HorizontalAlignment="Left" Margin="132,552,0,0" VerticalAlignment="Top" Width="75"/>-->
             <Image x:Name="still" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"  Canvas.Left="0" Canvas.Top="0"  >
 
@@ -40,7 +40,7 @@
                     <Label Content="Sat " Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
                 </StackPanel>
             </Border>
-            <Rectangle x:Name="roi" Fill="Transparent"  HorizontalAlignment="Left" Height="100" Stroke="White" VerticalAlignment="Top" Width="100" Canvas.Top="0" Canvas.Left="0" Visibility="Collapsed"/>
+            <Rectangle x:Name="roi" Fill="Transparent"  HorizontalAlignment="Left" Height="100" Stroke="White" VerticalAlignment="Top" Width="100" Canvas.Top="0" Canvas.Left="0" KeyDown="roi_KeyDown" Visibility="Collapsed"/>
 
         </Canvas>
 

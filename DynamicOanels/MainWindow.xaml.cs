@@ -79,7 +79,7 @@ namespace DynamicOanels
                 return;
             }
 
-           LsImageGallery.ItemsSource = ListImageObj;
+            LsImageGallery.ItemsSource = ListImageObj;
 
             if (nAttachedCams > 0)
             {

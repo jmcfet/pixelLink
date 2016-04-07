@@ -1,6 +1,7 @@
 ﻿using DynamicOanels.Views;
 using PixeLINK;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ExceptionServices;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Views;
 
@@ -18,9 +20,24 @@ namespace DynamicOanels
 {
     public class CameraContainer
     {
+        struct FEATURE_PARAM
+        {
+            float fMinValue;
+            float fMaxValue;
+        };
+       
+
+        struct CAMERA_FEATURE
+        {
+            uint uFeatureId;
+            uint uFlags;
+            uint uNumberOfParameters;
+            FEATURE_PARAM[] pParams;
+        }
+        
         public enum Features
         {
-           
+
             FEATURE_BRIGHTNESS = 0,
             FEATURE_PIXELINK_RESERVED_1 = 1,
             FEATURE_SHARPNESS = 2,
@@ -63,6 +80,20 @@ namespace DynamicOanels
             FEATURES_TOTAL = 38
 
         }
+
+        uint FEATURE_FLAG_PRESENCE = 0x00000001;  /* The feature is supported on this camera. */
+        uint FEATURE_FLAG_MANUAL = 0x00000002;
+        uint FEATURE_FLAG_AUTO = 0x00000004;
+        uint FEATURE_FLAG_ONEPUSH = 0x00000008;
+        uint FEATURE_FLAG_OFF = 0x00000010;
+        uint FEATURE_FLAG_DESC_SUPPORTED = 0x00000020;
+        uint FEATURE_FLAG_READ_ONLY = 0x00000040;
+        uint FEATURE_FLAG_SETTABLE_WHILE_STREAMING = 0x00000080;
+        uint FEATURE_FLAG_PERSISTABLE = 0x00000100; /* The feature will be saved with PxLSaveSettings */
+        uint FEATURE_FLAG_EMULATION = 0x00000200; /* The feature is implemented in the API, not the camera */
+        uint FEATURE_FLAG_VOLATILE = 0x00000400; /* The features (settable) value or limits, may change as the result of*/
+       
+       
         //      public Preview preview { get; set; }
         public settingsContainer settings = null;
         public Preview preview = null;
@@ -85,65 +116,187 @@ namespace DynamicOanels
         ListBox LsImageGallery = null;
         public static int[] serialNums = new int[10];
         int camNum = 0;
+        private List<CameraFeature> camfeatures = new List<CameraFeature>();
 
         public CameraContainer(int cameraNum, ImageEntity Tray, ListBox gallery)
         {
             preview = new Preview(this);
             camNum = cameraNum;
-             hist = new Histogram();
+            hist = new Histogram();
             settings = new settingsContainer(this);
             LsImageGallery = gallery;
             trayImage = Tray;
-           
+
             ReturnCode rc = Api.Initialize(serialNums[cameraNum], ref m_hCamera);
             if (cameraNum == 0)
                 bActive = true;
-            
+
             CameraInformation info = new CameraInformation();
-            
+
             rc = Api.GetCameraInformation(m_hCamera, ref info);
-            this.Name = Tray.CameraName ="a" + info.SerialNumber;
-            
+            this.Name = Tray.CameraName = "a" + info.SerialNumber;
+            LoadCameraFeatures();
             s_callbackDelegate[cameraNum] = new Api.Callback(MyCallbackFunction);
             Api.SetCallback(m_hCamera, Overlays.Frame, 0xD00D, s_callbackDelegate[cameraNum]);
             Api.SetStreamState(m_hCamera, StreamState.Start);
-            
+
         }
-        public ReturnCode GetFeature(PixeLINK.Feature feature,ref CameraFeature features)
+        public void LoadCameraFeatures()
         {
+            //   ClearFeatures();
+
+            // Determine how much memory to allocate for the CAMERA_FEATURES struct.
+            // API Note: By passing NULL in the second parameter, we are telling the
+            //   API that we don't want it to populate our CAMERA_FEATURES structure
+            //   yet - instead we just want it to tell us how much memory it will
+            //   need when it does populate it.
+            CameraFeature featureInfo = new CameraFeature();
+            foreach (Features feature in Enum.GetValues(typeof(Features)))
+            {
+                switch (feature)
+                {
+                    case Features.FEATURE_SHUTTER:
+
+                        ReturnCode rc = Api.GetCameraFeatures(m_hCamera, Feature.Shutter, ref featureInfo);
+                        break;
+                    case Features.FEATURE_BRIGHTNESS:
+                    
+                        rc = Api.GetCameraFeatures(m_hCamera, Feature.Brightness, ref featureInfo);
+                        break;
+                    case Features.FEATURE_FRAME_RATE:
+
+                        Api.GetCameraFeatures(m_hCamera, Feature.FrameRate, ref featureInfo);
+                        break;
+                }
+
+                               
+                camfeatures.Add(featureInfo);
+            }
+ 
+        }
+        /**
+* Function: FeatureSupported
+* Purpose:  Return true if the feature exists on the current camera.
+*/
+        public bool FeatureSupported(int featureId)
+        {
+            return FeatureSupportsFlag(featureId, FEATURE_FLAG_PRESENCE);
+        }
+
+    /**
+    * Function: FeatureSupportsFlag
+    * Purpose:  Return true if the feature supports the given FEATURE_FLAG.
+    */
+        public bool FeatureSupportsFlag(int featureId, UInt32 flag)
+        {
+            CameraFeature camFeature = camfeatures[featureId];
+            return ((int)camFeature.flags & flag) != 0;
            
+        }
+        /**
+        * Function: FeatureSupportsManual
+        * Purpose:  Return true if the feature supports Manual setting.
+        */
+        bool FeatureSupportsManual(int featureId)
+        {
+	        return FeatureSupported(featureId) && FeatureSupportsFlag(featureId, FEATURE_FLAG_MANUAL);
+        }
+
+
+    /**
+    * Function: FeatureSupportsAuto
+    * Purpose:  Return true if the feature supports Auto mode.
+    *           In Auto mode, the camera continuously updates the value of the
+    *           feature (until it is set back into Manual mode).
+*/
+    //bool
+    //CPxLCamera::FeatureSupportsAuto(const U32 featureId)
+    //{
+    //    return FeatureSupported(featureId) && FeatureSupportsFlag(featureId, FEATURE_FLAG_AUTO);
+    //}
+
+
+    /**
+    * Function: FeatureSupportsOnePush
+    * Purpose:  Return true if the feature supports One Push setting.
+    *           One Push setting is when the camera auto-sets the value of the
+    *           feature, then immediately goes back into manual mode.
+*/
+    //bool
+    //CPxLCamera::FeatureSupportsOnePush(const U32 featureId)
+    //{
+    //    return FeatureSupported(featureId) && FeatureSupportsFlag(featureId, FEATURE_FLAG_ONEPUSH);
+    //}
+
+
+    /**
+    * Function: FeatureSupportsOnOff
+    * Purpose:  
+*/
+    //bool
+    //CPxLCamera::FeatureSupportsOnOff(const U32 featureId)
+    //{
+    //    return FeatureSupported(featureId) && FeatureSupportsFlag(featureId, FEATURE_FLAG_OFF);
+    //}
+
+    private bool IsDynamicFeature(uint featureId)
+        {
+	        switch (featureId)
+	        {
+	        case (int)Features.FEATURE_FRAME_RATE: // Depends on ROI, decimation, etc.
+	        case (int)Features.FEATURE_SHUTTER: // As of ~May 2004, can depend on frame rate (for DCAM 1.31 compliance)
+	        case (int)Features.FEATURE_EXTENDED_SHUTTER: // Bugzilla.178 -- reread new limits when a kneepoint is set
+	        case (int)Features.FEATURE_SHARPNESS_SCORE:
+	        // others?
+		        return true;
+	        default:
+		        return false;
+	        }
+        }
+        public ReturnCode GetFeature(PixeLINK.Feature feature, ref CameraFeature features)
+        {
+
             ReturnCode rc = Api.GetCameraFeatures(m_hCamera, feature, ref features);
-           
+
             return rc;
         }
-        public float[] GetFeatureByParms(PixeLINK.Feature feature)
+        public ReturnCode GetFeatureByParms(PixeLINK.Feature feature, ref FeatureFlags flags, ref float[] parms)
         {
-            FeatureFlags flags = 0;
+
             int numParms = 4;
-            float[] parms = new float[numParms];
-            Api.GetFeature(m_hCamera, feature, ref flags, ref numParms, parms);
-            return parms;
+            return Api.GetFeature(m_hCamera, feature, ref flags, ref numParms, parms);
+
         }
-        public CameraFeature SetFeature(PixeLINK.Feature feature, float[] parms)
+        public ReturnCode SetFeature(PixeLINK.Feature feature, float[] parms, FeatureFlags flag = FeatureFlags.Manual)
         {
-            CameraFeature features = new CameraFeature();
+            
+            if (!FeatureSupportsManual((int)feature))
+                return ReturnCode.NotSupportedError;
            
-            ReturnCode rc = Api.SetStreamState(m_hCamera, StreamState.Stop);
-            rc = Api.SetFeature(m_hCamera, feature, FeatureFlags.Manual, parms.Count(), parms);
+            ReturnCode rc = Api.SetFeature(m_hCamera, feature, flag, parms.Count(), parms);
             if (rc != ReturnCode.Success)
             {
                 MessageBox.Show("bad parm");
             }
             ((App)Application.Current).logger.MyLogFile("SetFeature ", "Stop /start camera ");
+         
+
+            return ReturnCode.Success;
+        }
+        public CameraFeature SetFeatureandWait(PixeLINK.Feature feature, float[] parms, FeatureFlags flag = FeatureFlags.Manual)
+        {
+            CameraFeature features = new CameraFeature();
+            ReturnCode rc = Api.SetFeature(m_hCamera, feature, flag, parms.Count(), parms);
+            if (rc != ReturnCode.Success)
+            {
+                MessageBox.Show("bad parm");
+            }
+        ((App)Application.Current).logger.MyLogFile("SetFeature ", "Stop /start camera ");
             //     rc = Api.SetStreamState(m_hCamera, StreamState.Start);
-            //rc = Api.Uninitialize(m_hCamera);
-            //rc = Api.Initialize(serialNums[camNum], ref m_hCamera);
-            //s_callbackDelegate[camNum] = new Api.Callback(MyCallbackFunction);
-            //Api.SetCallback(m_hCamera, Overlays.Frame, 0xD00D, s_callbackDelegate[camNum]);
-            Api.SetStreamState(m_hCamera, StreamState.Start);
+
+            //          Api.SetStreamState(m_hCamera, StreamState.Start);
             return features;
         }
-
         public void StopCamera()
         {
             ReturnCode rc = Api.SetStreamState(m_hCamera, StreamState.Stop);
@@ -165,40 +318,39 @@ namespace DynamicOanels
                 // Calculate actual framerate.
                 long curtime = (long)(frameDesc.FrameTime * 1000);
                 long elapsedtime = curtime - m_startframetime;
-               
-                //int elapsedframes = frameDesc->uFrameNumber - pDlg->m_startframe;
-                //int elapsedframes = frameDesc.FrameNumber - m_startframe;
-                //Console.WriteLine("calc frame rate {0}  {1}", elapsedtime, elapsedframes);
-                //if (elapsedtime >= 50 && elapsedframes >= 5)
-                //{
-                //    // enough time and enough frames have elapsed to calculate a reasonably
-                //    // accurate frame rate.
-                //    m_rate = (double)(1000 * elapsedframes / elapsedtime);
-                //    m_startframetime = curtime;
-                //    m_startframe = frameDesc.FrameNumber;
 
-                //}
-                //else if (elapsedframes < 0 || elapsedtime < 0)
-                //{
-                //    // Stream has been restarted. Reset our start values.
-                //    m_startframetime = curtime;
-                //    m_startframe = frameDesc.FrameNumber;
-                //}
+                int elapsedframes = frameDesc.FrameNumber - m_startframe;
+                Console.WriteLine("calc frame rate {0}  {1}", elapsedtime, elapsedframes);
+                if (elapsedtime >= 50 && elapsedframes >= 5)
+                {
+                    // enough time and enough frames have elapsed to calculate a reasonably
+                    // accurate frame rate.
+                    m_rate = (double)(1000 * elapsedframes / elapsedtime);
+                    m_startframetime = curtime;
+                    m_startframe = frameDesc.FrameNumber;
 
-                //if ((elapsedtime < 50) || (elapsedframes < 0))
-                //{
-                //    // The rest of this function calculates the histogram data, and then
-                //    // sends a message to update the GUI. Do not do this more than 20 times
-                //    // per second - that would be a waste of processor power, since users
-                //    // can't tell the difference between a GUI that is updating 20 times
-                //    // per second and one that is updating 1000 times per second.
-                //    //
-                //    // The frame should also be ignored if the frame is older than 
-                //    // the most recent frame we've seen. (i.e. elapsedframes < 0)
+                }
+                else if (elapsedframes < 0 || elapsedtime < 0)
+                {
+                    // Stream has been restarted. Reset our start values.
+                    m_startframetime = curtime;
+                    m_startframe = frameDesc.FrameNumber;
+                }
 
-                //    Console.WriteLine("skip frame");
-                //    return 0;
-                //}
+                if ((elapsedtime < 50) || (elapsedframes < 0))
+                {
+                    // The rest of this function calculates the histogram data, and then
+                    // sends a message to update the GUI. Do not do this more than 20 times
+                    // per second - that would be a waste of processor power, since users
+                    // can't tell the difference between a GUI that is updating 20 times
+                    // per second and one that is updating 1000 times per second.
+                    //
+                    // The frame should also be ignored if the frame is older than 
+                    // the most recent frame we've seen. (i.e. elapsedframes < 0)
+
+                    Console.WriteLine("skip frame");
+                    return 0;
+                }
                 long numPixels = frameDesc.NumberOfPixels();
                 if (rawbits == null)
                     rawbits = new byte[numPixels];
@@ -223,15 +375,39 @@ namespace DynamicOanels
                 transfer.frameDesc = frameDesc;
                 transfer.hCamera = hCamera;
 
-               //really should not need the worker thread but put this in to keep the camera red lite off
+                //really should not need the worker thread but put this in to keep the camera red lite off
                 ThreadPool.QueueUserWorkItem(Work1, transfer);
- 
+
 
                 return 1;
             }
 
         }
+        public ReturnCode WaitForAutoToComplete(Feature apiFeature, ref float[] parms)
+        {
+            bool wait = true;
+            FeatureFlags flags = 0;
+            
+            while (wait == true)
+            {
+                System.Threading.Thread.Sleep(1000);
+                ReturnCode rc = this.GetFeatureByParms(Feature.Shutter, ref flags, ref parms);
+                if (rc != ReturnCode.Success)
+                {
+                    Mouse.OverrideCursor =  null;
+                    return rc;
+                }
+                if (0 == (flags & FeatureFlags.OnePush))
+                {
+                    Mouse.OverrideCursor = null;
+                    return ReturnCode.Success;
+                }
+            }
+            return ReturnCode.Success;
 
+
+        }
+        
         void showBuffer(byte[] FormattedBuf)
         {
 
@@ -245,6 +421,8 @@ namespace DynamicOanels
         }
         void Work1(object state)
         {
+            if (Application.Current == null)
+                return;
             int destBufferSize = 0;
             TransferBits transfer = state as TransferBits; ;
 

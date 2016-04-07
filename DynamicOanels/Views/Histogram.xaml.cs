@@ -461,7 +461,8 @@ namespace Views
         public void Work(TransferBits trans)
         {
             //do not execute processData on the UI thread
-           
+            if (Application.Current == null)
+                return;
             HistElt[] elts = Processdata(trans);
   //          trans.bits = null;
             trans = null;

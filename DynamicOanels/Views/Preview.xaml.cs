@@ -57,12 +57,13 @@ namespace Views
         private object logger;
         BitmapImage image = null;
         CameraContainer cam = null;
-        float[] RoiSizes = null;
-
+        float[] RoiSizes = new float [4];
+        FeatureFlags flags = 0;
         //   TextBoxOutputter outputter;
         public Preview(CameraContainer cam)
         {
             InitializeComponent();
+            
             this.cam = cam;
             //          outputter = new TextBoxOutputter(TestBox);
             //          Console.SetOut(outputter);
@@ -101,14 +102,13 @@ namespace Views
             this.KeyDown += new KeyEventHandler(roi_KeyDown);
             //         roi.PreviewKeyUp += Roi_PreviewKeyUp;
             roi.Focusable = true;
-            RoiSizes = cam.GetFeatureByParms(Feature.Roi);
+            ReturnCode rc = cam.GetFeatureByParms(Feature.Roi,ref flags,ref RoiSizes);
             top.Text = RoiSizes[(int)rectSides.top].ToString();
             left.Text = RoiSizes[(int)rectSides.left].ToString();
             width.Text = RoiSizes[(int)rectSides.width].ToString();
             height.Text = RoiSizes[(int)rectSides.height].ToString();
             selected = true;
-           
-           
+            
             e.Handled = true;
         }
         
@@ -253,6 +253,8 @@ namespace Views
         //this thread will pull work of of myQueue and update the UI using Dispatcher.Invoke
         public void Work(byte[] dstBuf)
         {
+            if (Application.Current == null)
+                return;
             Application.Current.Dispatcher.Invoke(
                DispatcherPriority.Background,
                    new Action(() =>

@@ -155,6 +155,7 @@ namespace DynamicOanels
 
             PopulateView();
         }
+
         void CreateSingleView()
         {
             Groups = new LayoutGroup() { Orientation = Orientation.Horizontal, Name = "Groups" };

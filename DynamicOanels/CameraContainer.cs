@@ -112,7 +112,6 @@ namespace DynamicOanels
         int m_startframe = 0;
         double m_rate = 0;
         byte[] rawbits = null;
-        byte[] FormattedBuf = null;
         ListBox LsImageGallery = null;
         public static int[] serialNums = new int[10];
         int camNum = 0;
@@ -278,7 +277,7 @@ namespace DynamicOanels
             {
                 MessageBox.Show("bad parm");
             }
-            ((App)Application.Current).logger.MyLogFile("SetFeature ", "Stop /start camera ");
+            ((App)Application.Current).logger.MyLogFile("SetFeature ", string.Format("Feature : {0} ",feature));
          
 
             return ReturnCode.Success;
@@ -357,7 +356,7 @@ namespace DynamicOanels
                 TransferBits transfer = new TransferBits();
 
                 transfer.bits = rawbits;
-                byte[] bits = new byte[40];
+    //            byte[] bits = new byte[40];
 
                 //copy the image bits from API to managed buffer
                 try
@@ -369,8 +368,8 @@ namespace DynamicOanels
                     ((App)Application.Current).logger.MyLogFile("MyCallbackFunction ", "Exception in Marshal.Copy ");
                     return 1;
                 }
-                Buffer.BlockCopy(transfer.bits, 0, bits, 0, 40);
-                ((App)Application.Current).logger.MyLogFile("pBuf ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(bits)));
+                //Buffer.BlockCopy(transfer.bits, 0, bits, 0, 40);
+                //((App)Application.Current).logger.MyLogFile("pBuf ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(bits)));
                 transfer.dataFormat = dataFormat;
                 transfer.frameDesc = frameDesc;
                 transfer.hCamera = hCamera;
@@ -428,20 +427,21 @@ namespace DynamicOanels
 
             Api.FormatImage(transfer.bits, ref transfer.frameDesc, ImageFormat.Bmp, null, ref destBufferSize);
             //                if (FormattedBuf == null)
-            FormattedBuf = new byte[destBufferSize];
-            Api.FormatImage(transfer.bits, ref transfer.frameDesc, ImageFormat.Bmp, FormattedBuf, ref destBufferSize);
-            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-            byte[] hash = md5.ComputeHash(FormattedBuf);
-            ((App)Application.Current).logger.MyLogFile("hash ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(hash)));
+            transfer.FormattedBuf = new byte[destBufferSize];
+            Api.FormatImage(transfer.bits, ref transfer.frameDesc, ImageFormat.Bmp, transfer.FormattedBuf, ref destBufferSize);
+            //MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            //byte[] hash = md5.ComputeHash(FormattedBuf);
+            //((App)Application.Current).logger.MyLogFile("hash ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(hash)));
             if (this.bActive == true)
             {
-                preview.Work(FormattedBuf);
+                preview.Work(transfer);
                 hist.Work(transfer);
                 return ;
             }
+            //this code will paint the camera in the tray
             Application.Current.Dispatcher.Invoke(
                   DispatcherPriority.Render,
-                      new Action(() => showBuffer(FormattedBuf)));
+                      new Action(() => showBuffer(transfer.FormattedBuf)));
 
 
             ((App)Application.Current).logger.MyLogFile("WorkThread ", String.Format(" Memory: {0:N0} bytes cam {1}  frame {2}", GC.GetTotalMemory(false), transfer.hCamera, transfer.frameDesc.FrameNumber));

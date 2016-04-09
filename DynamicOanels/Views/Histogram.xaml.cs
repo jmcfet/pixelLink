@@ -289,6 +289,7 @@ namespace Views
                 m_elts[(int)formats.RGB_RED_PIXELS].data[i] = 4 * countsGRBG[(int)BayerChannel.RED].bytecounts[i];
             }
         }
+        //paint the devexpress chart 
         void DataUpdated(HistElt[] m_elts)
         {
           

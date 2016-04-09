@@ -13,5 +13,6 @@ namespace DynamicOanels
         public PixeLINK.PixelFormat dataFormat;
         public FrameDescriptor frameDesc;
         public byte[] bits;
+        public byte[] FormattedBuf;
     }
 }

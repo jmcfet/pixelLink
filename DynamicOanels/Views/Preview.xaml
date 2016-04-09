@@ -34,8 +34,8 @@
             </Image>
             <Border Height="100" Width="100" Canvas.Top="100" Canvas.Left="50" BorderBrush="White" BorderThickness="1" >
                 <StackPanel Orientation="Vertical">
-                    <Label Content="Frame rate" Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
-                    <Label Content="Exposure " Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
+                    <Label Name="FRate" Content="Frame rate" Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
+                    <Label Name ="Exp" Content="Exposure " Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
                     <Label Content="Gain" Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
                     <Label Content="Sat " Height="22" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"  FontSize="10" Foreground="White"></Label>
                 </StackPanel>
@@ -45,7 +45,7 @@
         </Canvas>
 
         <!--</Border>-->
-        <Grid Grid.Row="2" Name="RoiValues" Visibility="Hidden" >
+        <Grid Grid.Row="2" Name="RoiValues" Visibility="Visible" >
            <StackPanel Orientation="Horizontal">
             <TextBox    Height="40" Width="63" x:Name="left"  BorderBrush="black" Text="10"/>
                 <TextBox    Height="40" Width="63" x:Name="top" BorderBrush="black" />

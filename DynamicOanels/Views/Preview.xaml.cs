@@ -57,7 +57,9 @@ namespace Views
         private object logger;
         BitmapImage image = null;
         CameraContainer cam = null;
+        float[] startRoiSizes = new float[4];
         float[] RoiSizes = new float [4];
+        Rect stillBB = new Rect();
         FeatureFlags flags = 0;
         //   TextBoxOutputter outputter;
         public Preview(CameraContainer cam)
@@ -103,10 +105,11 @@ namespace Views
             //         roi.PreviewKeyUp += Roi_PreviewKeyUp;
             roi.Focusable = true;
             ReturnCode rc = cam.GetFeatureByParms(Feature.Roi,ref flags,ref RoiSizes);
-            top.Text = RoiSizes[(int)rectSides.top].ToString();
-            left.Text = RoiSizes[(int)rectSides.left].ToString();
-            width.Text = RoiSizes[(int)rectSides.width].ToString();
-            height.Text = RoiSizes[(int)rectSides.height].ToString();
+            startRoiSizes = RoiSizes;
+            top.Text = startRoiSizes[(int)rectSides.top].ToString();
+            left.Text = startRoiSizes[(int)rectSides.left].ToString();
+            width.Text = startRoiSizes[(int)rectSides.width].ToString();
+            height.Text = startRoiSizes[(int)rectSides.height].ToString();
             selected = true;
             
             e.Handled = true;
@@ -122,13 +125,15 @@ namespace Views
 
         private void bROI_ItemClick(object sender, RoutedEventArgs e)
         {
-            
+            //position the ROI rectangle over the camera image
             Canvas.SetTop(roi, still.Height*.40 );
             Canvas.SetLeft(roi, still.Width*.20);
            
             roi.Width = myCanvas.ActualWidth * .60;
             roi.Visibility = Visibility.Visible;
-           
+
+            scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
+            scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
             cam.StopCamera();
 
         }
@@ -147,6 +152,8 @@ namespace Views
             _startPoint = e.GetPosition(myCanvas);
             _originalLeft = Canvas.GetLeft(roi);
             _originalTop = Canvas.GetTop(roi);
+            double test = Canvas.GetLeft(still);
+            double test1 = Canvas.GetLeft(still);
             Vector offset = VisualTreeHelper.GetOffset(myCanvas);
             Console.WriteLine("original position {0} ,{1} ", _originalLeft, _originalTop);
             Console.WriteLine("Window1_MouseLeftButtonDown starting point  {0} ,{1} ", _startPoint.X, _startPoint.Y);
@@ -158,14 +165,14 @@ namespace Views
         // Handler for drag stopping on user choise
         void DragFinishedMouseHandler(object sender, MouseButtonEventArgs e)
         {
-            //          Console.WriteLine("DragFinishedMouseHandler");
-            //if (_isDown)
-            //{
-            //    Console.WriteLine("DragFinishedMouseHandler _isDown");
-            //    _isDown = false;
-            //    _isDragging = false;
-            //    //              return;
-            //}
+            Console.WriteLine("DragFinishedMouseHandler");
+            if (_isDown)
+            {
+                Console.WriteLine("DragFinishedMouseHandler _isDown");
+                _isDown = false;
+                _isDragging = false;
+              
+            }
 
             //scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
             //scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
@@ -182,10 +189,10 @@ namespace Views
             //    aLayer.Remove(toRemoveArray[0]);
             //}
             //roi.Visibility = Visibility.Hidden;
-            //top.Text = RoiSizes[(int)rectSides.top].ToString();
-            //left.Text = RoiSizes[(int)rectSides.left].ToString();
-            //width.Text = RoiSizes[(int)rectSides.width].ToString();
-            //height.Text = RoiSizes[(int)rectSides.height].ToString();
+            top.Text = RoiSizes[(int)rectSides.top].ToString();
+            left.Text = RoiSizes[(int)rectSides.left].ToString();
+            width.Text = RoiSizes[(int)rectSides.width].ToString();
+            height.Text = RoiSizes[(int)rectSides.height].ToString();
             //cam.StartCamera();
             e.Handled = true;
         }
@@ -202,29 +209,35 @@ namespace Views
         {
             
         }
-        // Hanler for providing drag operation with selected element
+        // Handler for providing drag operation with selected element as the mouse moves
+        //the roi rectangle is moved within the image 
         void Window1_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.Source != roi)
-            {
-              
+           
                 return;
-            }
+           
             Point position = Mouse.GetPosition(myCanvas);
             down.Text = _isDown.ToString();
             if (_isDown)
             {
-                double test = e.GetPosition(myCanvas).X;
- //               if (_isDragging)
-  //              {
-                    double newY = (_startPoint.Y - _originalTop);
-                    double newX = (_startPoint.X - _originalLeft);
-                    Console.WriteLine("newx newy {0} ,{1} ", position.X - (_startPoint.X - _originalLeft), position.Y - (_startPoint.Y - _originalTop));
-                    left.Text = (position.X - (_startPoint.X - _originalLeft)).ToString();
-                    top.Text = (position.Y - (_startPoint.Y - _originalTop)).ToString();
-                Canvas.SetTop(roi, position.Y - (_startPoint.Y - _originalTop));
-                    Canvas.SetLeft(roi, position.X - (_startPoint.X - _originalLeft));
-   //             }
+
+                //adjust the roi box relative to how far we moved relative to starting position when the mouse
+                //was clicked (this is just relative to Still (image showing camera image)
+                double newPosX = position.X - (_startPoint.X - _originalLeft);
+                double newPosY = (position.Y - (_startPoint.Y - _originalTop));
+                //check to see if user trys moving outside the image
+                if (newPosY <= 0 || newPosX <= 0)
+                    return;
+                if (newPosY + roi.Height > still.Height)
+                    return;
+                Canvas.SetTop(roi, newPosY);
+                Canvas.SetLeft(roi, newPosX);
+                //now we need to position new roi in the camera image (original ROI)
+                left.Text = ((float)Math.Round(((Canvas.GetLeft(roi) )) * scaleX)).ToString();
+                top.Text = ((float)Math.Round(((Canvas.GetTop(roi))) * scaleY)).ToString();
+                width.Text = ((float)Math.Round(roi.Width * scaleX)).ToString();
+                height.Text =   ((float)Math.Round(roi.Height * scaleY)).ToString();
             }
         }
 
@@ -245,26 +258,36 @@ namespace Views
  
             RoiSizes[0] = 0;    //left
             RoiSizes[1] = 0;    //top
-            RoiSizes[2] = 1280;  //width
-            RoiSizes[3] = 1024;   //height
+            RoiSizes[2] = 2048;  //width
+            RoiSizes[3] = 2048;   //height
+            cam.StopCamera();
             cam.SetFeature(Feature.Roi, RoiSizes);
+            cam.StartCamera();
+            ReturnCode rc = cam.GetFeatureByParms(Feature.Roi, ref flags, ref RoiSizes);
+            top.Text = startRoiSizes[(int)rectSides.top].ToString();
+            left.Text = startRoiSizes[(int)rectSides.left].ToString();
+            width.Text = startRoiSizes[(int)rectSides.width].ToString();
+            height.Text = startRoiSizes[(int)rectSides.height].ToString();
             RoiValues.Visibility = Visibility.Visible;
         }
         //this thread will pull work of of myQueue and update the UI using Dispatcher.Invoke
-        public void Work(byte[] dstBuf)
+        public void Work(TransferBits trans)
         {
             if (Application.Current == null)
                 return;
+            
             Application.Current.Dispatcher.Invoke(
                DispatcherPriority.Background,
                    new Action(() =>
                    {
-                       MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-                       byte[] hash = md5.ComputeHash(dstBuf);
-                       ((App)Application.Current).logger.MyLogFile("Preview hash ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(hash)));
-
+                       //MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+                       //byte[] hash = md5.ComputeHash(trans.FormattedBuf);
+                       //((App)Application.Current).logger.MyLogFile("Preview hash ", string.Format(" thread {0} Bytes  {1}", Thread.CurrentThread.ManagedThreadId, ByteArrayToString(hash)));
+                       FRate.Content = string.Format("Frame Rate  {0:F0}", trans.frameDesc.ActualFrameRate);
+                       Exp.Content = string.Format("Exposure  {0:F0}", trans.frameDesc.Shutter);
+                       
                        image = new BitmapImage();
-                       using (MemoryStream stream = new MemoryStream(dstBuf))
+                       using (MemoryStream stream = new MemoryStream(trans.FormattedBuf))
                        {
                            image.BeginInit();
                            image.DecodePixelHeight = (int)myCanvas.ActualHeight;
@@ -277,7 +300,7 @@ namespace Views
                        still.Height = myCanvas.ActualHeight;
                        still.Width = myCanvas.ActualWidth;
                        still.Source = image;
-                       dstBuf = null;
+                       trans.FormattedBuf = null;
                         ((App)Application.Current).logger.MyLogFile("Preview Camera ", this.Name);
 
                    }));
@@ -299,15 +322,18 @@ namespace Views
                 _isDragging = false;
                 //              return;
             }
-            scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
-            scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
+            //scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
+            //scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
             RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
             RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
 
             RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
             RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
+            Mouse.OverrideCursor = Cursors.Wait;
+            
             cam.SetFeature(Feature.Roi, RoiSizes);
-
+            
+           
             Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
             if (toRemoveArray != null)
             {
@@ -319,8 +345,11 @@ namespace Views
             width.Text = RoiSizes[(int)rectSides.width].ToString();
             height.Text = RoiSizes[(int)rectSides.height].ToString();
             cam.StartCamera();
+            Mouse.OverrideCursor = null;
             e.Handled = true;
         }
+
+       
     }
 
 

@@ -247,6 +247,9 @@ namespace Views
             float expTime = parms[0] * 1000; //convert to ms
             Exposure.Value = (int)expTime;
             ExposureSet.Text = expTime.ToString();
+            ReturnCode rc = cam.GetFeatureByParms(Feature.ActualFrameRate, ref flags, ref parms);
+            actualframerate.Content = string.Format("Actual frame rate {0}", parms[0].ToString());
+
             if (bStopped == true)
                 cam.StartCamera();
           }

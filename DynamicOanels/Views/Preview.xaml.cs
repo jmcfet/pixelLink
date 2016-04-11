@@ -46,10 +46,9 @@ namespace Views
         bool _isDown = false;
         bool _isDragging;
         bool selected = false;
-        UIElement selectedElement = null;
-        Point _startPoint;
-        private double _originalLeft;
-        private double _originalTop;
+        Point _MouseStartPoint;
+        private double _ROIoriginalLeft;
+        private double _ROIoriginalTop;
         CancellationTokenSource cts;
         float scaleX = 0f;
         float scaleY = 0f;
@@ -69,7 +68,7 @@ namespace Views
             this.cam = cam;
             //          outputter = new TextBoxOutputter(TestBox);
             //          Console.SetOut(outputter);
-            Loaded += Camera_Loaded;
+            Loaded += Preview_Loaded;
        
         }
        
@@ -89,21 +88,30 @@ namespace Views
             throw new NotImplementedException();
         }
 
-        private void Camera_Loaded(object sender, RoutedEventArgs e)
+        private void Preview_Loaded(object sender, RoutedEventArgs e)
         {
             
-            selectedElement = roi;
-            _originalLeft = Canvas.GetLeft(selectedElement);
-            _originalTop = Canvas.GetTop(selectedElement);
-            //add adoner to the ROI rectangle so the user can grow/shrink area
-            aLayer = AdornerLayer.GetAdornerLayer(selectedElement);
-            aLayer.Add(new ResizingAdorner(selectedElement));
+           
+            _ROIoriginalLeft = Canvas.GetLeft(roi);
+            _ROIoriginalTop = Canvas.GetTop(roi);
+           
             roi.MouseMove += new MouseEventHandler(Window1_MouseMove);
             roi.MouseLeftButtonDown += new MouseButtonEventHandler(Window1_MouseLeftButtonDown);
             roi.MouseLeftButtonUp += new MouseButtonEventHandler(DragFinishedMouseHandler);
             this.KeyDown += new KeyEventHandler(roi_KeyDown);
-            //         roi.PreviewKeyUp += Roi_PreviewKeyUp;
             roi.Focusable = true;
+            //get the max roi for camera
+            CameraFeature features = cam.GetFeature(PixeLINK.Feature.Roi);
+            if (!features.IsSupported)
+                Reset.IsEnabled = false;
+            else
+            {
+                string temp = string.Format("{0}",features.parameters[2].MaximumValue);
+                temp += " X ";
+                temp += string.Format("{0}", features.parameters[3].MaximumValue);
+                Reset.Content = temp;
+            }
+            //get the current roi 
             ReturnCode rc = cam.GetFeatureByParms(Feature.Roi,ref flags,ref RoiSizes);
             startRoiSizes = RoiSizes;
             top.Text = startRoiSizes[(int)rectSides.top].ToString();
@@ -131,6 +139,9 @@ namespace Views
            
             roi.Width = myCanvas.ActualWidth * .60;
             roi.Visibility = Visibility.Visible;
+            //add adoner to the ROI rectangle so the user can grow/shrink area
+            aLayer = AdornerLayer.GetAdornerLayer(roi);
+            aLayer.Add(new ResizingAdorner(roi));
 
             scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
             scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
@@ -138,64 +149,21 @@ namespace Views
 
         }
 
-     
-
+     //mouse button down in the ROI rectangle is signalling the start of  ROI definition change using the mouse and drag
         void Window1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Console.WriteLine("Window1_MouseLeftButtonDown");
+          
             if (e.Source != roi)
-            {
-  //              _startPoint = e.GetPosition(myCanvas);
-                return;
-            }
-
-            _startPoint = e.GetPosition(myCanvas);
-            _originalLeft = Canvas.GetLeft(roi);
-            _originalTop = Canvas.GetTop(roi);
-            double test = Canvas.GetLeft(still);
-            double test1 = Canvas.GetLeft(still);
-            Vector offset = VisualTreeHelper.GetOffset(myCanvas);
-            Console.WriteLine("original position {0} ,{1} ", _originalLeft, _originalTop);
-            Console.WriteLine("Window1_MouseLeftButtonDown starting point  {0} ,{1} ", _startPoint.X, _startPoint.Y);
-
+               return;
+            _MouseStartPoint = e.GetPosition(myCanvas);
+            _ROIoriginalLeft = Canvas.GetLeft(roi);
+            _ROIoriginalTop = Canvas.GetTop(roi);
+            ((App)Application.Current).logger.MyLogFile("Window1_MouseLeftButtonDown ", string.Format("Mouse start {0} {1} ROI {2} {3} ", _MouseStartPoint.X, _MouseStartPoint.Y, _ROIoriginalLeft, _ROIoriginalTop));
             _isDown = true;
 
         }
 
-        // Handler for drag stopping on user choise
-        void DragFinishedMouseHandler(object sender, MouseButtonEventArgs e)
-        {
-            Console.WriteLine("DragFinishedMouseHandler");
-            if (_isDown)
-            {
-                Console.WriteLine("DragFinishedMouseHandler _isDown");
-                _isDown = false;
-                _isDragging = false;
-              
-            }
-
-            //scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
-            //scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
-            //RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
-            //RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
-
-            //RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
-            //RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
-            //cam.SetFeature(Feature.Roi, RoiSizes);
-
-            //Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
-            //if (toRemoveArray != null)
-            //{
-            //    aLayer.Remove(toRemoveArray[0]);
-            //}
-            //roi.Visibility = Visibility.Hidden;
-            top.Text = RoiSizes[(int)rectSides.top].ToString();
-            left.Text = RoiSizes[(int)rectSides.left].ToString();
-            width.Text = RoiSizes[(int)rectSides.width].ToString();
-            height.Text = RoiSizes[(int)rectSides.height].ToString();
-            //cam.StartCamera();
-            e.Handled = true;
-        }
+   
 
         private void Roi_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -217,31 +185,74 @@ namespace Views
            
                 return;
            
-            Point position = Mouse.GetPosition(myCanvas);
+            Point newMouseposition = Mouse.GetPosition(myCanvas);
+            ((App)Application.Current).logger.MyLogFile("MouseMove  ", string.Format("Mouse new pos {0} {1}  ", newMouseposition.X, newMouseposition.Y ));
+
             down.Text = _isDown.ToString();
             if (_isDown)
             {
 
-                //adjust the roi box relative to how far we moved relative to starting position when the mouse
-                //was clicked (this is just relative to Still (image showing camera image)
-                double newPosX = position.X - (_startPoint.X - _originalLeft);
-                double newPosY = (position.Y - (_startPoint.Y - _originalTop));
+                //get the amount the mouse moved in X and Y directions
+                double mouseXdiff = newMouseposition.X - _MouseStartPoint.X ;
+                double mouseYdiff = newMouseposition.Y - _MouseStartPoint.Y ;
+                ((App)Application.Current).logger.MyLogFile("MouseMove  ", string.Format("mouseXdiff {0} {1}  ", mouseXdiff, mouseYdiff));
+              
+                double newROIPosY = mouseYdiff > 0 ? _ROIoriginalTop + mouseYdiff : _ROIoriginalTop - Math.Abs(mouseYdiff);
+                double newROIPosX = mouseXdiff > 0 ? _ROIoriginalLeft + mouseXdiff : _ROIoriginalLeft - Math.Abs(mouseXdiff);
+               
+              
                 //check to see if user trys moving outside the image
-                if (newPosY <= 0 || newPosX <= 0)
+                if (newROIPosY <= 0 || newROIPosX <= 0)
                     return;
-                if (newPosY + roi.Height > still.Height)
+                if (newROIPosY + roi.Height > still.Height)
                     return;
-                Canvas.SetTop(roi, newPosY);
-                Canvas.SetLeft(roi, newPosX);
+                if (newROIPosX + roi.Width > still.Width)
+                    return;
+                ((App)Application.Current).logger.MyLogFile("new ROI top left  ", string.Format(" {0} {1}  ", newROIPosX, newROIPosY));
+                Canvas.SetTop(roi, newROIPosY);
+                Canvas.SetLeft(roi, newROIPosX);
                 //now we need to position new roi in the camera image (original ROI)
                 left.Text = ((float)Math.Round(((Canvas.GetLeft(roi) )) * scaleX)).ToString();
                 top.Text = ((float)Math.Round(((Canvas.GetTop(roi))) * scaleY)).ToString();
                 width.Text = ((float)Math.Round(roi.Width * scaleX)).ToString();
                 height.Text =   ((float)Math.Round(roi.Height * scaleY)).ToString();
+    //            _MouseStartPoint = newMouseposition;
             }
         }
+        //ROI definition is complete so tell the camera. we first scale the ROI units to the cameras current ROI 
+        private void roi_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (_isDown)
+            {
+                Console.WriteLine("DragFinishedMouseHandler _isDown");
+                _isDown = false;
+                _isDragging = false;
+                //              return;
+            }
 
-      
+            RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi))) * scaleX);
+            RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi))) * scaleY);
+            RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
+            RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
+            Mouse.OverrideCursor = Cursors.Wait;
+
+            cam.SetFeature(Feature.Roi, RoiSizes);
+
+            Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
+            if (toRemoveArray != null)
+            {
+                aLayer.Remove(toRemoveArray[0]);
+            }
+            roi.Visibility = Visibility.Hidden;
+            top.Text = RoiSizes[(int)rectSides.top].ToString();
+            left.Text = RoiSizes[(int)rectSides.left].ToString();
+            width.Text = RoiSizes[(int)rectSides.width].ToString();
+            height.Text = RoiSizes[(int)rectSides.height].ToString();
+            cam.StartCamera();
+            Mouse.OverrideCursor = null;
+            e.Handled = true;
+        }
+
 
         private void bSelectAll_ItemClick(object sender, DevExpress.Xpf.Bars.ItemClickEventArgs e)
         {
@@ -255,14 +266,16 @@ namespace Views
 
         private void Reset_ItemClick(object sender, DevExpress.Xpf.Bars.ItemClickEventArgs e)
         {
- 
-            RoiSizes[0] = 0;    //left
-            RoiSizes[1] = 0;    //top
-            RoiSizes[2] = 2048;  //width
-            RoiSizes[3] = 2048;   //height
+            CameraFeature features = cam.GetFeature(PixeLINK.Feature.Roi);
+            RoiSizes[0] = features.parameters[0].MinimumValue;    //left
+            RoiSizes[1] = features.parameters[1].MinimumValue;     //top
+            RoiSizes[2] = features.parameters[2].MaximumValue; //width
+            RoiSizes[3] = features.parameters[3].MaximumValue;    //height
             cam.StopCamera();
             cam.SetFeature(Feature.Roi, RoiSizes);
             cam.StartCamera();
+            ((App)Application.Current).logger.MyLogFile("Reset ", string.Format("ROI {0} {1} {2} {3} ", RoiSizes[0], RoiSizes[1], RoiSizes[2], RoiSizes[3]));
+
             ReturnCode rc = cam.GetFeatureByParms(Feature.Roi, ref flags, ref RoiSizes);
             top.Text = startRoiSizes[(int)rectSides.top].ToString();
             left.Text = startRoiSizes[(int)rectSides.left].ToString();
@@ -313,43 +326,42 @@ namespace Views
             return hex.ToString();
         }
 
-        private void roi_KeyDown(object sender, KeyEventArgs e)
+        // Handler for drag stopping on user choise
+        void DragFinishedMouseHandler(object sender, MouseButtonEventArgs e)
         {
+            Console.WriteLine("DragFinishedMouseHandler");
             if (_isDown)
             {
                 Console.WriteLine("DragFinishedMouseHandler _isDown");
                 _isDown = false;
                 _isDragging = false;
-                //              return;
+
             }
+
             //scaleX = RoiSizes[(int)rectSides.width] / (float)still.Width;
             //scaleY = RoiSizes[(int)rectSides.height] / (float)still.Height;
-            RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
-            RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
+            //RoiSizes[(int)rectSides.left] = (float)Math.Round(((Canvas.GetLeft(roi) - Canvas.GetLeft(still))) * scaleX);
+            //RoiSizes[(int)rectSides.top] = (float)Math.Round((float)((Canvas.GetTop(roi) - Canvas.GetTop(still))) * scaleY);
 
-            RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
-            RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
-            Mouse.OverrideCursor = Cursors.Wait;
-            
-            cam.SetFeature(Feature.Roi, RoiSizes);
-            
-           
-            Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
-            if (toRemoveArray != null)
-            {
-                aLayer.Remove(toRemoveArray[0]);
-            }
-            roi.Visibility = Visibility.Hidden;
+            //RoiSizes[(int)rectSides.width] = (float)Math.Round(roi.Width * scaleX);
+            //RoiSizes[(int)rectSides.height] = (float)Math.Round(roi.Height * scaleY);
+            //cam.SetFeature(Feature.Roi, RoiSizes);
+
+            //Adorner[] toRemoveArray = aLayer.GetAdorners(roi);
+            //if (toRemoveArray != null)
+            //{
+            //    aLayer.Remove(toRemoveArray[0]);
+            //}
+            //roi.Visibility = Visibility.Hidden;
             top.Text = RoiSizes[(int)rectSides.top].ToString();
             left.Text = RoiSizes[(int)rectSides.left].ToString();
             width.Text = RoiSizes[(int)rectSides.width].ToString();
             height.Text = RoiSizes[(int)rectSides.height].ToString();
-            cam.StartCamera();
-            Mouse.OverrideCursor = null;
+            //cam.StartCamera();
             e.Handled = true;
         }
 
-       
+
     }
 
 

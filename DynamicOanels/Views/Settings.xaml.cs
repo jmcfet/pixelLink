@@ -128,27 +128,25 @@ namespace Views
         }
         void SetSlidersandInitialValue(PixeLINK.Feature feature, Slider slider, TextBox box, float multiplier)
         {
-            CameraFeature features = new CameraFeature();
-            ReturnCode rc = cam.GetFeature(feature, ref features);
-            if (rc == ReturnCode.NotSupportedError)
+            CameraFeature features = cam.GetFeature(feature);
+            if (!features.IsSupported)
             {
                 slider.IsEnabled = false;
                 return;
             }
             slider.Minimum = features.parameters[0].MinimumValue * multiplier;
             slider.Maximum = features.parameters[0].MaximumValue * multiplier;
-            rc = cam.GetFeatureByParms(feature,ref flags, ref parms);
+            ReturnCode rc = cam.GetFeatureByParms(feature,ref flags, ref parms);
             box.Text = (parms[0] * multiplier).ToString();
         }
         void setFeature(PixeLINK.Feature feature,Slider slider,TextBox box)
         {
             CameraFeature features = new CameraFeature();
-            ReturnCode rc =  cam.GetFeature(feature,ref features);
-            if (rc == ReturnCode.NotSupportedError)
+            if (!features.IsSupported)
                 return;
             slider.Minimum = features.parameters[0].MinimumValue;
             slider.Maximum = features.parameters[0].MaximumValue;
-            rc = cam.GetFeatureByParms(feature,ref flags,ref parms);
+            ReturnCode rc = cam.GetFeatureByParms(feature,ref flags,ref parms);
             box.Text = parms[0].ToString();
         }
 

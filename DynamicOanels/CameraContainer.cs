@@ -138,7 +138,7 @@ namespace DynamicOanels
             s_callbackDelegate[cameraNum] = new Api.Callback(MyCallbackFunction);
             Api.SetCallback(m_hCamera, Overlays.Frame, 0xD00D, s_callbackDelegate[cameraNum]);
             Api.SetStreamState(m_hCamera, StreamState.Start);
-
+            
         }
         public void LoadCameraFeatures()
         {
@@ -165,6 +165,10 @@ namespace DynamicOanels
                     case Features.FEATURE_FRAME_RATE:
 
                         Api.GetCameraFeatures(m_hCamera, Feature.FrameRate, ref featureInfo);
+                        break;
+                    case Features.FEATURE_ROI:
+
+                        Api.GetCameraFeatures(m_hCamera, Feature.Roi, ref featureInfo);
                         break;
                 }
 
@@ -252,12 +256,11 @@ namespace DynamicOanels
 		        return false;
 	        }
         }
-        public ReturnCode GetFeature(PixeLINK.Feature feature, ref CameraFeature features)
+        public CameraFeature GetFeature(PixeLINK.Feature featureId)
         {
 
-            ReturnCode rc = Api.GetCameraFeatures(m_hCamera, feature, ref features);
+            return  camfeatures[(int)featureId];
 
-            return rc;
         }
         public ReturnCode GetFeatureByParms(PixeLINK.Feature feature, ref FeatureFlags flags, ref float[] parms)
         {

@@ -18,7 +18,7 @@ using Views;
 
 namespace DynamicOanels
 {
-    public class CameraContainer
+    public class CameraContainer     //testing
     {
         struct FEATURE_PARAM
         {
